@@ -2,7 +2,7 @@ import { Command, Option } from "commander";
 import { printEndpoint, printEndpointJson, printEndpointList } from "./commands/endpoints.js";
 import { callEndpoint, reportFailure, resolveEndpointUrl } from "./commands/request.js";
 import { ApiError } from "./http/pages.js";
-import { OffersManager, TARGET_TYPES, type TargetType } from "./offers/manager.js";
+import { ProductsService, TARGET_TYPES, type TargetType } from "./services/ProductsService.js";
 import { AuthManager, DEFAULT_RESOURCE } from "./auth/manager.js";
 import { getEndpoint, type HttpMethod } from "./urls/index.js";
 
@@ -58,13 +58,13 @@ export function createProgram(): Command {
       }
     });
 
-  const offers = program.command("offers").description("Work with products (offers) through the OffersManager");
+  const offers = program.command("offers").description("Work with products (offers) through the ProductsService");
   offers
     .command("list")
     .description("Fetch every product the publisher has defined")
     .action(async (_options: unknown, command: Command) => {
       const globals = globalsFrom(command);
-      const manager = new OffersManager({
+      const manager = new ProductsService({
         ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
         locale: globals.locale,
       });
@@ -89,7 +89,7 @@ export function createProgram(): Command {
     )
     .action(async (productId: string, options: { targetType?: TargetType }, command: Command) => {
       const globals = globalsFrom(command);
-      const manager = new OffersManager({
+      const manager = new ProductsService({
         ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
         locale: globals.locale,
       });

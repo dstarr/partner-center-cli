@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { AuthManager } from "../src/auth/manager.js";
 import { ApiError } from "../src/http/pages.js";
-import { OffersManager } from "../src/offers/manager.js";
+import { ProductsService } from "../src/services/ProductsService.js";
 
 const BASE = "https://graph.example.test/rp/product-ingestion";
 
@@ -21,7 +21,7 @@ function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status });
 }
 
-describe("OffersManager.getProduct", () => {
+describe("ProductsService.getProduct", () => {
   const tree = {
     $schema: "https://schema.mp.microsoft.com/schema/resource-tree/2022-03-01-preview2",
     root: "product/abc",
@@ -31,7 +31,7 @@ describe("OffersManager.getProduct", () => {
 
   it("calls the resource-tree URL with an unquoted targetType", async () => {
     let seen = "";
-    const manager = new OffersManager({
+    const manager = new ProductsService({
       auth: fakeAuth(),
       baseUrl: `${BASE}/resource-tree`,
       fetchImpl: async (url) => {
@@ -52,7 +52,7 @@ describe("OffersManager.getProduct", () => {
 
   it("omits targetType to read the draft", async () => {
     let seen = "";
-    const manager = new OffersManager({
+    const manager = new ProductsService({
       auth: fakeAuth(),
       baseUrl: `${BASE}/resource-tree`,
       fetchImpl: async (url) => {
@@ -65,7 +65,7 @@ describe("OffersManager.getProduct", () => {
   });
 
   it("rejects an empty id and an unknown target type", async () => {
-    const manager = new OffersManager({ auth: fakeAuth(), baseUrl: BASE, fetchImpl: async () => json(tree) });
+    const manager = new ProductsService({ auth: fakeAuth(), baseUrl: BASE, fetchImpl: async () => json(tree) });
     await assert.rejects(manager.getProduct("product/"), /Product id is required/);
     await assert.rejects(
       manager.getProduct("abc", { targetType: '"preview"' as never }),
@@ -74,7 +74,7 @@ describe("OffersManager.getProduct", () => {
   });
 
   it("throws ApiError when the product has no live submission", async () => {
-    const manager = new OffersManager({
+    const manager = new ProductsService({
       auth: fakeAuth(),
       baseUrl: BASE,
       fetchImpl: async () => json({ error: { code: "badRequest" } }, 400),
@@ -87,10 +87,10 @@ describe("OffersManager.getProduct", () => {
   });
 });
 
-describe("OffersManager.getAllProducts", () => {
+describe("ProductsService.getAllProducts", () => {
   it("calls the products.list URL and merges every page", async () => {
     const seen: string[] = [];
-    const manager = new OffersManager({
+    const manager = new ProductsService({
       auth: fakeAuth(),
       baseUrl: BASE,
       fetchImpl: async (url, init) => {
@@ -119,7 +119,7 @@ describe("OffersManager.getAllProducts", () => {
   });
 
   it("refuses to follow a next link to another host", async () => {
-    const manager = new OffersManager({
+    const manager = new ProductsService({
       auth: fakeAuth(),
       baseUrl: BASE,
       fetchImpl: async () =>
@@ -129,7 +129,7 @@ describe("OffersManager.getAllProducts", () => {
   });
 
   it("throws ApiError with the failed response", async () => {
-    const manager = new OffersManager({
+    const manager = new ProductsService({
       auth: fakeAuth(),
       baseUrl: BASE,
       fetchImpl: async () => json({ error: "forbidden" }, 403),

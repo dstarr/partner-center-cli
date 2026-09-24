@@ -29,7 +29,7 @@ export interface ProductResourceTree {
   [property: string]: unknown;
 }
 
-export interface OffersManagerOptions {
+export interface ProductsServiceOptions {
   /** Defaults to an AuthManager built from .env with the product ingestion resource. */
   auth?: AuthManager;
   /** Replaces the service base URL, including its path. */
@@ -40,11 +40,11 @@ export interface OffersManagerOptions {
 }
 
 /** Orchestrates calls for products (offers) defined in Partner Center. */
-export class OffersManager {
+export class ProductsService {
   private readonly auth: AuthManager;
-  private readonly options: Omit<OffersManagerOptions, "auth">;
+  private readonly options: Omit<ProductsServiceOptions, "auth">;
 
-  constructor(options: OffersManagerOptions = {}) {
+  constructor(options: ProductsServiceOptions = {}) {
     const { auth, ...rest } = options;
     this.options = rest;
     if (auth) {
