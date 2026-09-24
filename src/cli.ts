@@ -1,7 +1,8 @@
 import { Command, Option } from "commander";
 import { printEndpoint, printEndpointJson, printEndpointList } from "./commands/endpoints.js";
 import { callEndpoint, resolveEndpointUrl } from "./commands/request.js";
-import { assertCloud, getEndpoint, type HttpMethod } from "./urls/index.js";
+import { AuthManager, DEFAULT_RESOURCE } from "./auth/manager.js";
+import { getEndpoint, type HttpMethod } from "./urls/index.js";
 
 const METHODS: readonly HttpMethod[] = ["GET", "POST", "PATCH", "PUT", "DELETE"];
 
@@ -9,18 +10,20 @@ export function createProgram(): Command {
   const program = new Command();
 
   program
-    .name("partner-center")
-    .description("Explore Microsoft Partner Center REST APIs")
+    .name("api-explorer")
+    .description("Explore REST APIs from a catalog of endpoints")
     .version("0.1.0")
-    .option("--cloud <cloud>", "published cloud: global or china", "global")
-    .option("--base-url <url>", "https origin to use instead of the cloud base URL")
-    .option("--token <token>", "access token (defaults to PARTNER_CENTER_ACCESS_TOKEN)")
-    .option("--locale <locale>", "value for the X-Locale header", "en-US");
+    .option("--base-url <url>", "https origin to use instead of the service base URL")
+    .addOption(
+      new Option("--locale <locale>", "value for the X-Locale header")
+        .env("PARTNER_CENTER_LOCALE")
+        .default("en-US"),
+    );
 
   program
     .command("endpoints")
     .description("List catalog endpoints")
-    .option("--group <group>", "filter by group, such as customers or products")
+    .option("--group <group>", "filter by group")
     .addOption(new Option("--method <method>", "filter by HTTP method").choices([...METHODS]))
     .option("--json", "print the catalog as JSON")
     .action((options: { group?: string; method?: HttpMethod; json?: boolean }) => {
@@ -36,9 +39,27 @@ export function createProgram(): Command {
     });
 
   program
+    .command("auth")
+    .description("Sign in with the client credentials in .env and show the token expiry")
+    .option("--resource <uri>", "resource (token audience) to request a token for", DEFAULT_RESOURCE)
+    .option("--print-token", "write the access token to stdout")
+    .action(async (options: { resource: string; printToken?: boolean }) => {
+      const auth = AuthManager.fromEnv(process.env, { resource: options.resource });
+      console.error(`POST ${auth.loginUrl}`);
+      const token = await auth.getToken();
+      console.error(`Token type: ${token.tokenType}`);
+      console.error(`Resource: ${token.resource}`);
+      console.error(`Expires: ${token.expiresAt.toISOString()}`);
+      console.error(`client-request-id: ${token.clientRequestId}`);
+      if (options.printToken) {
+        console.log(token.accessToken);
+      }
+    });
+
+  program
     .command("describe")
     .description("Show one endpoint's path, parameters, and docs")
-    .argument("<id>", "endpoint id, such as customers.list")
+    .argument("<id>", "endpoint id")
     .action((id: string) => {
       printEndpoint(getEndpoint(id));
     });
@@ -53,12 +74,11 @@ export function createProgram(): Command {
     program
       .command("url")
       .description("Print the URL for an endpoint")
-      .argument("<id>", "endpoint id, such as customers.list"),
+      .argument("<id>", "endpoint id"),
   ).action((id: string, options: RequestOptions, command: Command) => {
     const globals = globalsFrom(command);
     const url = resolveEndpointUrl({
       id,
-      cloud: globals.cloud,
       ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
       params: options.param,
       query: options.query,
@@ -71,7 +91,7 @@ export function createProgram(): Command {
     program
       .command("call")
       .description("Call an endpoint and print the response body")
-      .argument("<id>", "endpoint id, such as customers.list")
+      .argument("<id>", "endpoint id")
       .option("--body <json>", "JSON request body")
       .option("--body-file <path>", "file containing the JSON request body")
       .option("--dry-run", "print the request line without sending it")
@@ -84,12 +104,10 @@ export function createProgram(): Command {
     }
     await callEndpoint({
       id,
-      cloud: globals.cloud,
       ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
       params: options.param,
       query: options.query,
       strictQuery: !options.allowQuery,
-      ...(globals.token !== undefined ? { token: globals.token } : {}),
       locale: globals.locale,
       ...(options.body !== undefined ? { body: options.body } : {}),
       ...(options.bodyFile !== undefined ? { bodyFile: options.bodyFile } : {}),
@@ -102,13 +120,14 @@ export function createProgram(): Command {
     "after",
     `
 Examples:
-  partner-center endpoints
-  partner-center describe customers.list
-  partner-center url customers.list --query size=40
-  partner-center call products.list --query country=US --query targetView=OnlineServices
+  api-explorer auth
+  api-explorer endpoints
+  api-explorer describe <id>
+  api-explorer url <id> --param name=value --query name=value
+  api-explorer call <id> --query name=value
 
-Add operations in src/urls/catalog.ts. The URL builder checks each path template
-against its declared parameters.
+Register APIs in src/urls/bases.ts and add operations in src/urls/catalog.ts.
+The URL builder checks each path template against its declared parameters.
 `,
   );
 
@@ -116,9 +135,7 @@ against its declared parameters.
 }
 
 interface GlobalOptions {
-  cloud: string;
   baseUrl?: string;
-  token?: string;
   locale: string;
 }
 
@@ -135,19 +152,19 @@ interface CallOptions extends RequestOptions {
   timeout: string;
 }
 
-function globalsFrom(command: Command): {
-  cloud: ReturnType<typeof assertCloud>;
-  baseUrl?: string;
-  token?: string;
-  locale: string;
-} {
+function globalsFrom(command: Command): GlobalOptions {
   const options = command.optsWithGlobals() as GlobalOptions;
+  const baseUrl = nonEmpty(options.baseUrl);
   return {
-    cloud: assertCloud(options.cloud),
-    ...(options.baseUrl !== undefined ? { baseUrl: options.baseUrl } : {}),
-    ...(options.token !== undefined ? { token: options.token } : {}),
-    locale: options.locale,
+    ...(baseUrl !== undefined ? { baseUrl } : {}),
+    locale: nonEmpty(options.locale) ?? "en-US",
   };
+}
+
+/** Blank entries in .env arrive as empty strings; treat them as unset. */
+function nonEmpty(value: string | undefined): string | undefined {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : undefined;
 }
 
 function collect(value: string, previous: string[]): string[] {

@@ -1,7 +1,6 @@
 export type {
   BuildUrlInput,
   BuiltRequest,
-  CloudId,
   Endpoint,
   HttpMethod,
   PathParam,
@@ -9,13 +8,13 @@ export type {
   ServiceId,
 } from "./types.js";
 export {
-  assertCloud,
   baseUrlFor,
-  isCloudId,
+  getService,
   normalizeBaseUrl,
   resolveBaseUrl,
   services,
   UrlBuildError,
+  type ServiceDefinition,
 } from "./bases.js";
 export { assertEndpointShape, buildUrl, placeholderNames } from "./build.js";
-export { endpointGroups, endpoints, getEndpoint, listEndpoints } from "./catalog.js";
+export { endpoint, endpointGroups, endpoints, getEndpoint, listEndpoints } from "./catalog.js";

@@ -3,7 +3,7 @@ import type { BuildUrlInput, BuiltRequest, Endpoint } from "./types.js";
 
 const PLACEHOLDER = /\{([A-Za-z][A-Za-z0-9]*)\}/g;
 const ANY_BRACE = /\{[^}]*\}/g;
-const PATH_PATTERN = /^\/v1(?:\/[A-Za-z0-9{}._-]+)+$/;
+const PATH_PATTERN = /^(?:\/[A-Za-z0-9{}._-]+)+$/;
 
 export function placeholderNames(path: string): string[] {
   return [...path.matchAll(PLACEHOLDER)].map((match) => {
@@ -19,7 +19,7 @@ export function placeholderNames(path: string): string[] {
 export function assertEndpointShape(endpoint: Endpoint): void {
   if (!/^[a-z][A-Za-z0-9]*(\.[a-z][A-Za-z0-9]*)+$/.test(endpoint.id)) {
     throw new Error(
-      `Endpoint id "${endpoint.id}" must be dot-separated words starting with a lowercase letter, such as customers.list.`,
+      `Endpoint id "${endpoint.id}" must be dot-separated words starting with a lowercase letter, such as items.list.`,
     );
   }
   if (!endpoint.id.startsWith(`${endpoint.group}.`)) {
@@ -27,7 +27,7 @@ export function assertEndpointShape(endpoint: Endpoint): void {
   }
   if (!PATH_PATTERN.test(endpoint.path)) {
     throw new Error(
-      `Endpoint "${endpoint.id}" path must look like /v1/resource/{param}. Received ${endpoint.path}.`,
+      `Endpoint "${endpoint.id}" path must be absolute, such as /v1/resource/{param}. Received ${endpoint.path}.`,
     );
   }
   if (endpoint.path.includes("?")) {
@@ -78,7 +78,9 @@ export function buildUrl(input: BuildUrlInput): BuiltRequest {
   for (const name of names) {
     const raw = pathParams[name];
     if (raw === undefined) {
-      throw new UrlBuildError(`Missing path parameter "${name}" for ${endpoint.id}.`);
+      throw new UrlBuildError(
+        `Missing path parameter "${name}" for ${endpoint.id}. Pass --param ${name}=<value>.`,
+      );
     }
     const value = String(raw).trim();
     if (value.length === 0) {
@@ -89,18 +91,25 @@ export function buildUrl(input: BuildUrlInput): BuiltRequest {
 
   const baseUrl = resolveBaseUrl({
     service: endpoint.service,
-    cloud: input.cloud ?? "global",
     ...(input.baseUrl !== undefined ? { baseUrl: input.baseUrl } : {}),
   });
   const url = new URL(path, `${baseUrl}/`);
 
   const declaredQuery = new Set(endpoint.queryParams.map((param) => param.name));
+  const missingQuery = endpoint.queryParams.filter(
+    (param) => param.required && (query[param.name] === undefined || query[param.name] === null),
+  );
+  if (missingQuery.length > 0) {
+    const names = missingQuery.map((param) => `"${param.name}"`).join(", ");
+    const flags = missingQuery.map((param) => `--query ${param.name}=<value>`).join(" ");
+    const noun = missingQuery.length === 1 ? "parameter" : "parameters";
+    throw new UrlBuildError(
+      `Missing query ${noun} ${names} for ${endpoint.id}. Pass ${flags}, or run "describe ${endpoint.id}" for details.`,
+    );
+  }
   for (const param of endpoint.queryParams) {
     const raw = query[param.name];
     if (raw === undefined || raw === null) {
-      if (param.required) {
-        throw new UrlBuildError(`Missing query parameter "${param.name}" for ${endpoint.id}.`);
-      }
       continue;
     }
     url.searchParams.append(param.name, String(raw));

@@ -1,11 +1,11 @@
 {
-  "name": "partner-center-cli",
+  "name": "api-explorer",
   "version": "0.1.0",
   "private": true,
-  "description": "Command line tool for exploring Microsoft Partner Center REST APIs",
+  "description": "Command line tool for exploring REST APIs",
   "type": "module",
   "bin": {
-    "partner-center": "./dist/index.js"
+    "api-explorer": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc",
@@ -18,7 +18,8 @@
     "node": ">=20"
   },
   "dependencies": {
-    "commander": "^14.0.0"
+    "commander": "^14.0.0",
+    "dotenv": "^18.0.3"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

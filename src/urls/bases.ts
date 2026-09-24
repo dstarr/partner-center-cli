@@ -1,30 +1,17 @@
-import type { CloudId, ServiceId } from "./types.js";
+import type { ServiceId } from "./types.js";
 
-/**
- * Published Partner Center base URLs.
- * https://learn.microsoft.com/en-us/partner-center/developer/partner-center-rest-urls
- *
- * `partnerCenter` is the main REST API. `partner` is pricing and referrals,
- * which Microsoft publishes only for the global cloud.
- */
-export const services = {
-  partnerCenter: {
-    description: "Customers, catalog, orders, subscriptions, invoices, and profiles",
-    bases: {
-      global: "https://api.partnercenter.microsoft.com",
-      china: "https://partner.partnercenterapi.microsoftonline.cn",
-    },
-  },
-  partner: {
-    description: "Pricing and referrals",
-    bases: {
-      global: "https://api.partner.microsoft.com",
-    },
-  },
-} as const satisfies Record<
-  ServiceId,
-  { description: string; bases: Partial<Record<CloudId, string>> }
->;
+export interface ServiceDefinition {
+  description: string;
+  /** https origin used when `baseUrlEnv` is unset or blank. */
+  defaultBaseUrl: string;
+  /** Environment variable that overrides `defaultBaseUrl`. */
+  baseUrlEnv?: string;
+  /** Resource (token audience) the AuthManager requests. Defaults to the AuthManager's DEFAULT_RESOURCE. */
+  resource?: string;
+}
+
+/** APIs the catalog can call. Endpoints reference these by key. */
+export const services: Readonly<Record<ServiceId, ServiceDefinition>> = {};
 
 export class UrlBuildError extends Error {
   constructor(message: string) {
@@ -33,24 +20,22 @@ export class UrlBuildError extends Error {
   }
 }
 
-export function isCloudId(value: string): value is CloudId {
-  return value === "global" || value === "china";
+export function getService(service: ServiceId): ServiceDefinition {
+  const definition = services[service];
+  if (!definition) {
+    const known = Object.keys(services);
+    throw new UrlBuildError(
+      `Unknown service "${service}". Known services: ${known.length > 0 ? known.join(", ") : "none"}.`,
+    );
+  }
+  return definition;
 }
 
-export function assertCloud(value: string): CloudId {
-  if (isCloudId(value)) {
-    return value;
-  }
-  throw new UrlBuildError(`Unknown cloud "${value}". Use global or china.`);
-}
-
-export function baseUrlFor(service: ServiceId, cloud: CloudId): string {
-  const bases: Partial<Record<CloudId, string>> = services[service].bases;
-  const base = bases[cloud];
-  if (!base) {
-    throw new UrlBuildError(`${service} does not publish a ${cloud} base URL.`);
-  }
-  return base;
+/** Read at call time because .env is loaded after this module is imported. */
+export function baseUrlFor(service: ServiceId, env: NodeJS.ProcessEnv = process.env): string {
+  const definition = getService(service);
+  const fromEnv = definition.baseUrlEnv ? env[definition.baseUrlEnv]?.trim() : undefined;
+  return normalizeBaseUrl(fromEnv || definition.defaultBaseUrl);
 }
 
 export function normalizeBaseUrl(value: string): string {
@@ -72,13 +57,9 @@ export function normalizeBaseUrl(value: string): string {
   return url.origin;
 }
 
-export function resolveBaseUrl(input: {
-  service: ServiceId;
-  cloud: CloudId;
-  baseUrl?: string;
-}): string {
+export function resolveBaseUrl(input: { service: ServiceId; baseUrl?: string }): string {
   if (input.baseUrl !== undefined) {
     return normalizeBaseUrl(input.baseUrl);
   }
-  return baseUrlFor(input.service, input.cloud);
+  return baseUrlFor(input.service);
 }

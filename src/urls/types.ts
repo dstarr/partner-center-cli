@@ -1,8 +1,7 @@
 export type HttpMethod = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 
-export type CloudId = "global" | "china";
-
-export type ServiceId = "partnerCenter" | "partner";
+/** Key into the `services` registry in bases.ts. */
+export type ServiceId = string;
 
 /** A value substituted into a `{placeholder}` in an endpoint path. */
 export interface PathParam {
@@ -18,18 +17,18 @@ export interface QueryParam {
 }
 
 /**
- * One Partner Center operation.
+ * One API operation.
  * Paths are templates relative to the service base URL. Add new operations
  * in the catalog instead of assembling URLs at the call site.
  */
 export interface Endpoint {
-  /** Stable id used by the CLI, such as `customers.list`. */
+  /** Stable id used by the CLI, such as `items.list`. */
   id: string;
   /** Browse group. The id must start with `{group}.`. */
   group: string;
   method: HttpMethod;
   summary: string;
-  /** Absolute path beginning with `/v1`. Placeholders are `{camelCase}`. */
+  /** Absolute path such as `/v1/items/{itemId}`. Placeholders are `{camelCase}`. */
   path: string;
   service: ServiceId;
   pathParams: readonly PathParam[];
@@ -39,8 +38,7 @@ export interface Endpoint {
 
 export interface BuildUrlInput {
   endpoint: Endpoint;
-  cloud?: CloudId;
-  /** Replaces the published base URL for this call. Must be an https origin. */
+  /** Replaces the service base URL for this call. Must be an https origin. */
   baseUrl?: string;
   pathParams?: Readonly<Record<string, string | number>>;
   query?: Readonly<Record<string, string | number | boolean | undefined | null>>;

@@ -1,6 +1,6 @@
 import type { HttpMethod } from "../urls/types.js";
 
-export interface PartnerCenterResponse {
+export interface ApiResponse {
   status: number;
   ok: boolean;
   requestId: string;
@@ -8,7 +8,7 @@ export interface PartnerCenterResponse {
   bodyText: string;
 }
 
-export async function sendPartnerCenterRequest(input: {
+export async function sendApiRequest(input: {
   url: URL;
   method: HttpMethod;
   accessToken: string;
@@ -16,12 +16,10 @@ export async function sendPartnerCenterRequest(input: {
   body?: string;
   timeoutMs?: number;
   fetchImpl?: typeof fetch;
-}): Promise<PartnerCenterResponse> {
+}): Promise<ApiResponse> {
   const token = input.accessToken.trim();
   if (token.length === 0) {
-    throw new Error(
-      "Missing access token. Pass --token or set PARTNER_CENTER_ACCESS_TOKEN.",
-    );
+    throw new Error("Missing access token.");
   }
 
   const requestId = crypto.randomUUID();

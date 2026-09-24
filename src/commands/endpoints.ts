@@ -2,6 +2,10 @@ import type { Endpoint, HttpMethod } from "../urls/types.js";
 import { endpointGroups, listEndpoints } from "../urls/catalog.js";
 
 export function printEndpointList(filter: { group?: string; method?: HttpMethod }): void {
+  if (listEndpoints().length === 0) {
+    console.error("The catalog is empty. Add endpoints in src/urls/catalog.ts.");
+    return;
+  }
   if (filter.group !== undefined && !endpointGroups().includes(filter.group)) {
     throw new Error(
       `Unknown group "${filter.group}". Groups: ${endpointGroups().join(", ")}.`,

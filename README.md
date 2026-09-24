@@ -1,6 +1,8 @@
-# partner-center
+# api-explorer
 
-Command line tool for exploring the Microsoft Partner Center REST APIs. Requests are chosen from a catalog of endpoints, so URLs are built from one path template instead of being assembled at each call site.
+Command line tool for exploring REST APIs. Requests are chosen from a catalog of endpoints, so URLs are built from one path template instead of being assembled at each call site.
+
+The catalog is currently empty. Register an API and add its endpoints as described below.
 
 ## Setup
 
@@ -11,54 +13,86 @@ npm install
 npm run build
 ```
 
-During development you can skip the build:
+## Configuration
+
+Settings are read from a `.env` file in the current directory using [dotenv](https://github.com/motdotla/dotenv). Copy `.env.example` to `.env` and fill it in. `.env` is gitignored.
+
+| Variable | Flag | Default |
+| --- | --- | --- |
+| `PARTNER_CENTER_TENANT_ID` | none | none |
+| `PARTNER_CENTER_CLIENT_ID` | none | none |
+| `PARTNER_CENTER_CLIENT_SECRET` | none | none |
+| `PARTNER_CENTER_LOCALE` | `--locale` | `en-US` |
+
+A flag overrides the environment. A variable already set in your shell overrides `.env`. Blank entries count as unset.
+
+During development you can skip the build. Put `--` after `dev` so npm passes flags such as `--query` through to the CLI instead of reading them itself:
 
 ```sh
 npm run dev -- endpoints
+npm run dev -- call <id> --query name=value
 ```
 
-## Explore the catalog
+## Authentication
+
+`AuthManager` in `src/auth/manager.ts` signs in with the client credentials grant. It posts `resource`, `client_id`, `client_secret`, and `grant_type=client_credentials` to `https://login.microsoftonline.com/{tenantId}/oauth2/token`, then caches the token until five minutes before it expires.
+
+| URL | Used for |
+| --- | --- |
+| `https://login.microsoftonline.com` | Login base URL (`DEFAULT_LOGIN_BASE_URL`) |
+| `https://api.partnercenter.microsoft.com` | Default `resource` (`DEFAULT_RESOURCE`) |
+
+`call` requests a token for the `resource` declared on the endpoint's service, or the default when the service doesn't declare one. To test sign-in on its own:
 
 ```sh
-partner-center endpoints
-partner-center endpoints --group products
-partner-center describe customers.list
-partner-center url customers.list --query size=40
-partner-center url customers.get --param customerId=aaaabbbb-0000-cccc-1111-dddd2222eeee
+api-explorer auth                                          # show the token expiry
+api-explorer auth --print-token                            # also write the token to stdout
+api-explorer auth --resource https://api.example.com       # request a token for another resource
 ```
 
-`url` only prints the resolved URL. `call` sends it:
+## Commands
 
 ```sh
-export PARTNER_CENTER_ACCESS_TOKEN="<bearer token>"
-partner-center call customers.list --query size=40
-partner-center call products.list --query country=US --query targetView=OnlineServices
+api-explorer endpoints [--group <group>] [--method GET] [--json]
+api-explorer describe <id>
+api-explorer url <id> --param name=value --query name=value
+api-explorer call <id> --param name=value --query name=value [--body <json> | --body-file <path>] [--dry-run]
 ```
 
-The response body is written to stdout. The request line, status, `MS-RequestId`, and `MS-CorrelationId` are written to stderr.
+`url` only prints the resolved URL. `call` sends it. The response body is written to stdout; the request line, status, `MS-RequestId`, and `MS-CorrelationId` are written to stderr.
 
-```sh
-partner-center call customers.list --query size=40 --dry-run
-partner-center call customers.get --param customerId=<guid> --cloud china
-partner-center url profiles.organization.get --base-url https://example.test
-```
+`--allow-query` sends a query parameter that is not declared on the endpoint. `--base-url` replaces the service host for a single command.
 
-`--allow-query` sends a query parameter that is not declared on the endpoint. Use that when trying a filter the catalog does not list yet.
+## Add an API
 
-## Hosts
+1. Register the service in `src/urls/bases.ts`:
 
-Base URLs come from the [Partner Center REST URLs](https://learn.microsoft.com/en-us/partner-center/developer/partner-center-rest-urls) table and live in `src/urls/bases.ts`.
+   ```ts
+   export const services: Readonly<Record<ServiceId, ServiceDefinition>> = {
+     example: {
+       description: "Example API",
+       defaultBaseUrl: "https://api.example.com",
+       baseUrlEnv: "EXAMPLE_BASE_URL", // optional override read from .env
+       resource: "https://api.example.com", // optional token audience; defaults to DEFAULT_RESOURCE
+     },
+   };
+   ```
 
-| Cloud | Service | Base URL |
-| --- | --- | --- |
-| global | partnerCenter | `https://api.partnercenter.microsoft.com` |
-| china | partnerCenter | `https://partner.partnercenterapi.microsoftonline.cn` |
-| global | partner (pricing and referrals) | `https://api.partner.microsoft.com` |
+2. Add endpoints to `src/urls/catalog.ts`, wrapping each in `endpoint(...)`:
 
-`--cloud` selects the published host. `--base-url` replaces it with another https origin.
+   ```ts
+   export const endpoints: readonly Endpoint[] = [
+     endpoint({
+       id: "items.get",
+       group: "items",
+       method: "GET",
+       summary: "Get one item.",
+       path: "/v1/items/{itemId}",
+       service: "example",
+       pathParams: [{ name: "itemId", description: "Item id." }],
+       queryParams: [],
+     }),
+   ];
+   ```
 
-## Add an endpoint
-
-Add an entry to `src/urls/catalog.ts`. The path is a template such as `/v1/customers/{customerId}`. Every `{placeholder}` needs a matching `pathParams` entry, and query fields are declared on `queryParams`. The catalog checks that those agree when it loads.
-
-The seeded catalog covers profiles, customers, subscriptions, orders, products, and invoices. It is a starting set for exploration, not the full Partner Center surface.
+   Every `{placeholder}` needs a matching `pathParams` entry, query fields are declared on `queryParams`, and `service` must be registered. These are checked when the catalog loads.

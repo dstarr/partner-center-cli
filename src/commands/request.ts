@@ -1,11 +1,11 @@
 import { readFile } from "node:fs/promises";
-import { buildUrl, getEndpoint, type CloudId } from "../urls/index.js";
-import { sendPartnerCenterRequest } from "../http/client.js";
+import { AuthManager } from "../auth/manager.js";
+import { buildUrl, getEndpoint, getService } from "../urls/index.js";
+import { sendApiRequest } from "../http/client.js";
 import { formatBody, parseAssignments } from "../params.js";
 
 export function resolveEndpointUrl(input: {
   id: string;
-  cloud: CloudId;
   baseUrl?: string;
   params: readonly string[];
   query: readonly string[];
@@ -14,7 +14,6 @@ export function resolveEndpointUrl(input: {
   const endpoint = getEndpoint(input.id);
   const built = buildUrl({
     endpoint,
-    cloud: input.cloud,
     ...(input.baseUrl !== undefined ? { baseUrl: input.baseUrl } : {}),
     pathParams: parseAssignments(input.params, "--param"),
     query: parseAssignments(input.query, "--query"),
@@ -25,12 +24,10 @@ export function resolveEndpointUrl(input: {
 
 export async function callEndpoint(input: {
   id: string;
-  cloud: CloudId;
   baseUrl?: string;
   params: readonly string[];
   query: readonly string[];
   strictQuery: boolean;
-  token?: string;
   locale: string;
   body?: string;
   bodyFile?: string;
@@ -49,12 +46,10 @@ export async function callEndpoint(input: {
     return;
   }
 
-  const token = input.token ?? process.env["PARTNER_CENTER_ACCESS_TOKEN"];
-  if (!token) {
-    throw new Error("Missing access token. Pass --token or set PARTNER_CENTER_ACCESS_TOKEN.");
-  }
+  const { resource } = getService(endpoint.service);
+  const token = await AuthManager.fromEnv(process.env, resource ? { resource } : {}).getAccessToken();
 
-  const response = await sendPartnerCenterRequest({
+  const response = await sendApiRequest({
     url,
     method: endpoint.method,
     accessToken: token,
@@ -77,6 +72,10 @@ export async function callEndpoint(input: {
 
   if (formatted.length > 0) {
     process.stderr.write(formatted);
+  } else if (response.status === 401 || response.status === 403) {
+    console.error(
+      "The API returned no error body. The token was issued, but the app may not be authorized for this API.",
+    );
   }
   process.exitCode = 1;
 }
