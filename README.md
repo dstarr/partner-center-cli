@@ -106,14 +106,14 @@ api-explorer call <id> --param name=value --query name=value [--body <json> | --
 1. Register the service in `src/urls/bases.ts`:
 
    ```ts
-   export const services: Readonly<Record<ServiceId, ServiceDefinition>> = {
+   export const services = {
      example: {
        description: "Example API",
        defaultBaseUrl: "https://api.example.com", // may include a path
        baseUrlEnv: "EXAMPLE_BASE_URL", // optional override read from .env
        resource: "https://api.example.com", // optional token audience; defaults to DEFAULT_RESOURCE
      },
-   };
+   } as const satisfies Record<string, ServiceDefinition>;
    ```
 
 2. Add endpoints to `src/urls/catalog.ts`, wrapping each in `endpoint(...)`:
@@ -126,7 +126,7 @@ api-explorer call <id> --param name=value --query name=value [--body <json> | --
        method: "GET",
        summary: "Get one item.",
        path: "/v1/items/{itemId}",
-       service: "example",
+       service: services.example,
        pathParams: [{ name: "itemId", description: "Item id." }],
        queryParams: [],
      }),

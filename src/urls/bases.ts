@@ -24,8 +24,6 @@ export const services = {
   },
 } as const satisfies Record<string, ServiceDefinition>;
 
-export type ServiceId = keyof typeof services;
-
 export class UrlBuildError extends Error {
   constructor(message: string) {
     super(message);
