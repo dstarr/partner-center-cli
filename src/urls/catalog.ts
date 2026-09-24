@@ -8,6 +8,9 @@ import type { Endpoint, HttpMethod } from "./types.js";
  * To explore a new operation, add it here instead of building a URL by hand.
  */
 export const endpoints: readonly Endpoint[] = [
+  /**
+   * List all offers (products) defined by the publisher.
+   */
   endpoint({
     id: "products.list",
     group: "products",
@@ -49,6 +52,10 @@ export const endpoints: readonly Endpoint[] = [
       "https://learn.microsoft.com/en-us/partner-center/marketplace-offers/product-ingestion-api#method-3-query-string-parameters",
   }),
   
+  
+  /**
+   * Get a product and all of its resources (plans, listings, pricing, and so on) as a resource tree.
+   */
   endpoint({
     id: "product.get",
     group: "product",
