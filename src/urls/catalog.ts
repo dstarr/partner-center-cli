@@ -47,6 +47,35 @@ export const endpoints: readonly Endpoint[] = [
     docsUrl:
       "https://learn.microsoft.com/en-us/partner-center/marketplace-offers/product-ingestion-api#method-3-query-string-parameters",
   }),
+  endpoint({
+    id: "products.get",
+    group: "products",
+    method: "GET",
+    summary: "Get a product and all of its resources (plans, listings, pricing, and so on) as a resource tree.",
+    path: "/resource-tree/product/{productId}",
+    service: "productIngestion",
+    pathParams: [
+      {
+        name: "productId",
+        description: "Product durable id without the product/ prefix, for example 27494b66-e9d3-4b2d-848b-5ce0543abd90.",
+      },
+    ],
+    queryParams: [
+      {
+        name: "targetType",
+        description: "Environment to read: draft, preview, or live. Omit for draft. Send without quotes.",
+        required: false,
+      },
+      {
+        name: "$version",
+        description: "Maximum schema version for each resource in the tree.",
+        required: true,
+        default: "2022-03-01-preview5",
+      },
+    ],
+    docsUrl:
+      "https://learn.microsoft.com/en-us/partner-center/marketplace-offers/product-ingestion-api#method-1-resource-tree",
+  }),
 ];
 
 const byId = new Map(endpoints.map((item) => [item.id, item]));

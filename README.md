@@ -7,6 +7,7 @@ Command line tool for exploring REST APIs. Requests are chosen from a catalog of
 | Id | Request | Service |
 | --- | --- | --- |
 | `products.list` | `GET {PRODUCT_INGESTION_BASE_URL}/product?$version={schema-version}` | Product Ingestion API |
+| `products.get` | `GET {PRODUCT_INGESTION_BASE_URL}/resource-tree/product/{productId}?targetType={target}&$version={schema-version}` | Product Ingestion API |
 
 `products.list` returns all offers defined by the publisher. `$version` defaults to `2022-03-01-preview3`. Results are paged, so pass `--all` to follow `@nextLink` and get every product in one `value` array:
 
@@ -18,17 +19,25 @@ api-explorer call products.list --query '$version=2022-03-01-preview3'   # quote
 
 ## OffersManager
 
-`OffersManager` in `src/offers/manager.ts` orchestrates calls for products (offers). `getAllProducts()` calls the `products.list` URL, follows every `@nextLink`, and returns the products as an array.
+`OffersManager` in `src/offers/manager.ts` orchestrates calls for products (offers).
+
+- `getAllProducts()` calls the `products.list` URL, follows every `@nextLink`, and returns the products as an array.
+- `getProduct(productId, { targetType })` calls the `products.get` URL and returns the product's resource tree: the product plus its plans, listings, pricing, and submissions. `productId` may include the `product/` prefix. `targetType` is `draft` (the default when omitted), `preview`, or `live`. `$version` defaults to `2022-03-01-preview5`.
 
 ```ts
-const products = await new OffersManager().getAllProducts();
+const manager = new OffersManager();
+const products = await manager.getAllProducts();
+const tree = await manager.getProduct(products[0].id, { targetType: "preview" });
 ```
 
 From the command line:
 
 ```sh
 api-explorer offers list
+api-explorer offers get product/27494b66-e9d3-4b2d-848b-5ce0543abd90 --target-type preview
 ```
+
+Microsoft's docs show `targetType="preview"` with quotes, but the API rejects quoted values, so the value is sent without them. `live` returns HTTP 400 for a product that has never been published.
 
 The Product Ingestion API requests tokens for `https://graph.microsoft.com`. See the [Product Ingestion API docs](https://learn.microsoft.com/en-us/partner-center/marketplace-offers/product-ingestion-api).
 

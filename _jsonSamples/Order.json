@@ -1,0 +1,651 @@
+{
+  "$schema": "https://schema.mp.microsoft.com/schema/resource-tree/2022-03-01-preview2",
+  "root": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+  "target": {
+    "targetType": "draft"
+  },
+  "resources": [
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/product/2022-03-01-preview3",
+      "id": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "identity": {
+        "externalId": "ampupdemo-per-user"
+      },
+      "type": "softwareAsAService",
+      "alias": "Per User Demo Offer"
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/customer-leads/2022-03-01-preview3",
+      "id": "customer-leads/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "leadDestination": "httpsEndpoint",
+      "httpsEndpointLeadConfiguration": {
+        "httpsEndpointUrl": "https://ampup.cumulus26.com/webhook/apc-leads/v1?publisherId=aef53ee9-e8d9-4de5-bac6-96b19ef88cc7"
+      }
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/microsoft365-integration/2022-03-01-preview2",
+      "id": "microsoft365-integration/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "integratesWithMicrosoftGraph": false
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/commercial-marketplace-setup/2022-03-01-preview2",
+      "id": "commercial-marketplace-setup/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "sellThroughMicrosoft": true,
+      "useMicrosoftLicenseManagementService": false
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/plan/2022-03-01-preview3",
+      "id": "plan/27494b66-e9d3-4b2d-848b-5ce0543abd90/47011245-a5bc-4e3c-b00c-02dca76e0836",
+      "identity": {
+        "externalId": "evaluate-per-user"
+      },
+      "alias": "Evaluate (1-10)",
+      "azureRegions": [
+        "azureGlobal"
+      ],
+      "displayRank": 1,
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90"
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/plan/2022-03-01-preview3",
+      "id": "plan/27494b66-e9d3-4b2d-848b-5ce0543abd90/b9d84b23-b83c-4703-803a-a19358456547",
+      "identity": {
+        "externalId": "launch-per-user"
+      },
+      "alias": "Launch (10-20)",
+      "azureRegions": [
+        "azureGlobal"
+      ],
+      "displayRank": 2,
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90"
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/plan/2022-03-01-preview3",
+      "id": "plan/27494b66-e9d3-4b2d-848b-5ce0543abd90/f6b99dcd-2608-4aa7-b5e4-151423842dfc",
+      "identity": {
+        "externalId": "accelerate-per-user"
+      },
+      "alias": "Accelerate (20-30)",
+      "azureRegions": [
+        "azureGlobal"
+      ],
+      "displayRank": 3,
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90"
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/plan/2022-03-01-preview3",
+      "id": "plan/27494b66-e9d3-4b2d-848b-5ce0543abd90/8853b8c9-398b-4b0e-9500-952d4c2cdab7",
+      "identity": {
+        "externalId": "scale-per-user"
+      },
+      "alias": "Scale (30-40)",
+      "azureRegions": [
+        "azureGlobal"
+      ],
+      "displayRank": 4,
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90"
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/plan/2022-03-01-preview3",
+      "id": "plan/27494b66-e9d3-4b2d-848b-5ce0543abd90/faefdf91-eff5-4e11-aca3-77d015426579",
+      "identity": {
+        "externalId": "enterprise-per-user"
+      },
+      "alias": "Enterprise (40+)",
+      "azureRegions": [
+        "azureGlobal"
+      ],
+      "displayRank": 5,
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90"
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/property/2022-03-01-preview3",
+      "id": "property/27494b66-e9d3-4b2d-848b-5ce0543abd90/public/main",
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "kind": "azureSaaS",
+      "termsConditions": "standardMicrosoft",
+      "appVersion": "",
+      "standardContractAmendment": "",
+      "categories": {
+        "developer-tools-saas": [
+          "devService"
+        ],
+        "OperationsSupplyChain": [
+          "sales-order-management"
+        ]
+      },
+      "industries": {},
+      "cloudIndustries": {},
+      "customAmendments": []
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/listing/2022-03-01-preview3",
+      "id": "listing/27494b66-e9d3-4b2d-848b-5ce0543abd90/public/main/default/en-us",
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "kind": "azureSaaS",
+      "title": "AMPup Demo Per User",
+      "description": "Built by Microsoft Marketplace insiders. Cumulus26's team includes former Microsoft Marketplace engineers and marketplace specialists who built the platform, bringing unmatched expertise going far beyond what documentation can deliver.<div><br></div><div><p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Maecenas porttitor congue massa. Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna.</p><p></p><ul><li>Nunc viverra imperdiet enim. Fusce est. Vivamus a tellus.</li><li>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Proin pharetra nonummy pede. Mauris et orci.</li><li>Aenean nec lorem. In porttitor. Donec laoreet nonummy augue.</li><li>Suspendisse dui purus, scelerisque at, vulputate vitate, pretium mattis, nunc. Mauris eget neque at sem venenatis eleifend. Ut nonummy.</li></ul><p></p><p>Donec blandit feugiat ligula. Donec hendrerit, felis et imperdiet euismod, purus ipsum pretium metus, in lacinia nulla nisl eget sapien. Donec ut est in lectus consequat consequat.</p><div><p>Etiam eget dui. Aliquam erat volutpat. Sed at lorem in nunc porta tristique.</p></div></div>",
+      "searchResultSummary": "Search results summary: Fusce aliquet pede non pede. Suspendisse dapibus lorem pellentesque magna. I",
+      "gettingStartedInstructions": "This is a demo offer",
+      "searchKeywords": [
+        "AMPup ",
+        "Cumulus26",
+        "SaaS"
+      ],
+      "privacyPolicyLink": "https://www.cumulus26.com/privacy",
+      "supportContact": {
+        "name": "Support Team",
+        "email": "support@Cumulus26.com",
+        "phone": "2085777000",
+        "url": "https://www.cumulus26.com/contact-us"
+      },
+      "engineeringContact": {
+        "name": "David Starr",
+        "email": "david@cumulus26.com",
+        "phone": "2085777000"
+      },
+      "cloudSolutionProviderContact": {
+        "name": "",
+        "email": "david@cumulus26.com",
+        "phone": "2085777000"
+      },
+      "languageId": "en-us"
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/listing-asset/2022-03-01-preview3",
+      "id": "listing-asset/27494b66-e9d3-4b2d-848b-5ce0543abd90/public/main/default/en-us/azurelogolarge/1",
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "kind": "azure",
+      "listing": "listing/27494b66-e9d3-4b2d-848b-5ce0543abd90/public/main/default/en-us",
+      "type": "azureLogoLarge",
+      "languageId": "en-us",
+      "description": "",
+      "displayOrder": 0,
+      "fileName": "Cumulus26-350x350.png",
+      "url": "https://listingfile.ingestion.marketplace.microsoft.com/files-93782570-27494b66-e9d3-4b2d-848b-5ce0543abd90/3033535670384424303/Cumulus26-350x350.png?skoid=bb18de47-7be8-41df-9e7b-c29d7d12e304&sktid=975f013f-7f24-47e8-a7d3-abc4752bf346&skt=2026-09-24T18%3A49%3A34Z&ske=2026-10-01T18%3A49%3A34Z&sks=b&skv=2024-11-04&sv=2024-11-04&se=2026-10-01T18%3A50%3A14Z&sr=b&sp=r&sig=BZTJcUpzBwBp%2F20LsHZoNJ62I9tzCHDB0rNMZE%2BTiUE%3D",
+      "friendlyName": "Cumulus26-350x350.png"
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/listing-asset/2022-03-01-preview3",
+      "id": "listing-asset/27494b66-e9d3-4b2d-848b-5ce0543abd90/public/main/default/en-us/azurelogosmall/1",
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "kind": "azure",
+      "listing": "listing/27494b66-e9d3-4b2d-848b-5ce0543abd90/public/main/default/en-us",
+      "type": "azureLogoSmall",
+      "languageId": "en-us",
+      "description": "",
+      "displayOrder": 0,
+      "fileName": "Cumulus26-350x350.png",
+      "url": "https://listingfile.ingestion.marketplace.microsoft.com/files-93782570-27494b66-e9d3-4b2d-848b-5ce0543abd90/3046178158359063247/Cumulus26-350x350.png?skoid=bb18de47-7be8-41df-9e7b-c29d7d12e304&sktid=975f013f-7f24-47e8-a7d3-abc4752bf346&skt=2026-09-24T18%3A49%3A34Z&ske=2026-10-01T18%3A49%3A34Z&sks=b&skv=2024-11-04&sv=2024-11-04&se=2026-10-01T18%3A50%3A14Z&sr=b&sp=r&sig=Sva6HxwT6XwVlrmYIu%2FCzmlBxkzRMGHsL8JokWYuoSc%3D",
+      "friendlyName": "Cumulus26-350x350.png"
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/listing-asset/2022-03-01-preview3",
+      "id": "listing-asset/27494b66-e9d3-4b2d-848b-5ce0543abd90/public/main/default/en-us/azurelogomedium/1",
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "kind": "azure",
+      "listing": "listing/27494b66-e9d3-4b2d-848b-5ce0543abd90/public/main/default/en-us",
+      "type": "azureLogoMedium",
+      "languageId": "en-us",
+      "description": "",
+      "displayOrder": 0,
+      "fileName": "Cumulus26-350x350.png",
+      "url": "https://listingfile.ingestion.marketplace.microsoft.com/files-93782570-27494b66-e9d3-4b2d-848b-5ce0543abd90/3019096229613071967/Cumulus26-350x350.png?skoid=bb18de47-7be8-41df-9e7b-c29d7d12e304&sktid=975f013f-7f24-47e8-a7d3-abc4752bf346&skt=2026-09-24T18%3A49%3A34Z&ske=2026-10-01T18%3A49%3A34Z&sks=b&skv=2024-11-04&sv=2024-11-04&se=2026-10-01T18%3A50%3A14Z&sr=b&sp=r&sig=BaXf0KoSG9i1IDVZcUbvV0hL15IGpc5Vlg1YMO5h76E%3D",
+      "friendlyName": "Cumulus26-350x350.png"
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/listing-asset/2022-03-01-preview3",
+      "id": "listing-asset/27494b66-e9d3-4b2d-848b-5ce0543abd90/public/main/default/en-us/azurelogoscreenshot/1",
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "kind": "azure",
+      "listing": "listing/27494b66-e9d3-4b2d-848b-5ce0543abd90/public/main/default/en-us",
+      "type": "azureLogoScreenshot",
+      "languageId": "en-us",
+      "description": "Multiple publishers",
+      "displayOrder": 0,
+      "fileName": "screenshot_1.png",
+      "url": "https://listingfile.ingestion.marketplace.microsoft.com/files-93782570-27494b66-e9d3-4b2d-848b-5ce0543abd90/3064107839011908516/screenshot_1.png?skoid=bb18de47-7be8-41df-9e7b-c29d7d12e304&sktid=975f013f-7f24-47e8-a7d3-abc4752bf346&skt=2026-09-24T18%3A49%3A34Z&ske=2026-10-01T18%3A49%3A34Z&sks=b&skv=2024-11-04&sv=2024-11-04&se=2026-10-01T18%3A50%3A14Z&sr=b&sp=r&sig=06E0FSe8MiZHBnkICXzR2EoPEYdBcPdx7cFUNyr99Xg%3D",
+      "friendlyName": "screenshot_1.png"
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/listing-asset/2022-03-01-preview3",
+      "id": "listing-asset/27494b66-e9d3-4b2d-848b-5ce0543abd90/public/main/default/en-us/azurelogoscreenshot/2",
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "kind": "azure",
+      "listing": "listing/27494b66-e9d3-4b2d-848b-5ce0543abd90/public/main/default/en-us",
+      "type": "azureLogoScreenshot",
+      "languageId": "en-us",
+      "description": "Simple technical configuration",
+      "displayOrder": 0,
+      "fileName": "screenshot_2.png",
+      "url": "https://listingfile.ingestion.marketplace.microsoft.com/files-93782570-27494b66-e9d3-4b2d-848b-5ce0543abd90/3043558901560327420/screenshot_2.png?skoid=bb18de47-7be8-41df-9e7b-c29d7d12e304&sktid=975f013f-7f24-47e8-a7d3-abc4752bf346&skt=2026-09-24T18%3A49%3A34Z&ske=2026-10-01T18%3A49%3A34Z&sks=b&skv=2024-11-04&sv=2024-11-04&se=2026-10-01T18%3A50%3A14Z&sr=b&sp=r&sig=pNC%2FJ%2B26d7Dh2f8%2BU7sPCT02oCwIxhpQ67l6mDRh%2FyI%3D",
+      "friendlyName": "screenshot_2.png"
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/listing-asset/2022-03-01-preview3",
+      "id": "listing-asset/27494b66-e9d3-4b2d-848b-5ce0543abd90/public/main/default/en-us/azurelogoscreenshot/3",
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "kind": "azure",
+      "listing": "listing/27494b66-e9d3-4b2d-848b-5ce0543abd90/public/main/default/en-us",
+      "type": "azureLogoScreenshot",
+      "languageId": "en-us",
+      "description": "Subscription management",
+      "displayOrder": 0,
+      "fileName": "screenshot_3.png",
+      "url": "https://listingfile.ingestion.marketplace.microsoft.com/files-93782570-27494b66-e9d3-4b2d-848b-5ce0543abd90/3012688344756148577/screenshot_3.png?skoid=bb18de47-7be8-41df-9e7b-c29d7d12e304&sktid=975f013f-7f24-47e8-a7d3-abc4752bf346&skt=2026-09-24T18%3A49%3A34Z&ske=2026-10-01T18%3A49%3A34Z&sks=b&skv=2024-11-04&sv=2024-11-04&se=2026-10-01T18%3A50%3A14Z&sr=b&sp=r&sig=EOtBEGMpOdj%2F7F24qV3cMcLYtoVuJ0i1WmG2QxDmUXA%3D",
+      "friendlyName": "screenshot_3.png"
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/listing-asset/2022-03-01-preview3",
+      "id": "listing-asset/27494b66-e9d3-4b2d-848b-5ce0543abd90/public/main/default/en-us/azurelogoscreenshot/4",
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "kind": "azure",
+      "listing": "listing/27494b66-e9d3-4b2d-848b-5ce0543abd90/public/main/default/en-us",
+      "type": "azureLogoScreenshot",
+      "languageId": "en-us",
+      "description": "Multiple notfication channels",
+      "displayOrder": 0,
+      "fileName": "screenshot_4.png",
+      "url": "https://listingfile.ingestion.marketplace.microsoft.com/files-93782570-27494b66-e9d3-4b2d-848b-5ce0543abd90/3047750415516008902/screenshot_4.png?skoid=bb18de47-7be8-41df-9e7b-c29d7d12e304&sktid=975f013f-7f24-47e8-a7d3-abc4752bf346&skt=2026-09-24T18%3A49%3A34Z&ske=2026-10-01T18%3A49%3A34Z&sks=b&skv=2024-11-04&sv=2024-11-04&se=2026-10-01T18%3A50%3A14Z&sr=b&sp=r&sig=8uCwBG1IMHi05QnXlH0qB7c4tbH7P2MBnBb7LBW8T0I%3D",
+      "friendlyName": "screenshot_4.png"
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/plan-listing/2022-03-01-preview3",
+      "id": "plan-listing/27494b66-e9d3-4b2d-848b-5ce0543abd90/public/main/47011245-a5bc-4e3c-b00c-02dca76e0836/en-us",
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "kind": "azureSaaS-plan",
+      "name": "Evaluate (1-10)",
+      "description": "<p>ras dapibus dapibus nisl. Vestibulum quis dolor a felis congue vehicula. Maecenas pede purus, tristique ac, tempus eget, egestas quis, mauris.</p><p>Curabitur non eros. Nullam hendrerit bibendum justo. Fusce iaculis, est quis lacinia pretium, pede metus molestie lacus, at gravida wisi ante at libero.</p>",
+      "plan": "plan/27494b66-e9d3-4b2d-848b-5ce0543abd90/47011245-a5bc-4e3c-b00c-02dca76e0836",
+      "languageId": "en-us"
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/plan-listing/2022-03-01-preview3",
+      "id": "plan-listing/27494b66-e9d3-4b2d-848b-5ce0543abd90/public/main/b9d84b23-b83c-4703-803a-a19358456547/en-us",
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "kind": "azureSaaS-plan",
+      "name": "Launch (10-20)",
+      "description": "<p>Etiam at ligula et tellus ullamcorper ultrices. In fermentum, lorem non cursus porttitor, diam urna accumsan lacus, sed interdum wisi nibh nec nisl. Ut tincidunt volutpat urna.</p><p>Mauris eleifend nulla eget mauris. Sed cursus quam id felis. Curabitur posuere quam vel nibh.</p>",
+      "plan": "plan/27494b66-e9d3-4b2d-848b-5ce0543abd90/b9d84b23-b83c-4703-803a-a19358456547",
+      "languageId": "en-us"
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/plan-listing/2022-03-01-preview3",
+      "id": "plan-listing/27494b66-e9d3-4b2d-848b-5ce0543abd90/public/main/f6b99dcd-2608-4aa7-b5e4-151423842dfc/en-us",
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "kind": "azureSaaS-plan",
+      "name": "Accelerate (20-30)",
+      "description": "<p>Donec ullamcorper fringilla eros. Fusce in sapien eu purus dapibus commodo. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p><p>Cras faucibus condimentum odio. Sed ac ligula. Aliquam at eros.</p>",
+      "plan": "plan/27494b66-e9d3-4b2d-848b-5ce0543abd90/f6b99dcd-2608-4aa7-b5e4-151423842dfc",
+      "languageId": "en-us"
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/plan-listing/2022-03-01-preview3",
+      "id": "plan-listing/27494b66-e9d3-4b2d-848b-5ce0543abd90/public/main/8853b8c9-398b-4b0e-9500-952d4c2cdab7/en-us",
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "kind": "azureSaaS-plan",
+      "name": "Scale (30-40)",
+      "description": "<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Proin semper, ante vitae sollicitudin posuere, metus quam iaculis nibh, vitae scelerisque nunc massa eget pede. Sed velit urna, interdum vel, ultricies vel, faucibus at, quam.</p>Donec elit est, consectetuer eget, consequat quis, tempus quis, wisi. In in nunc. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos.<span></span>",
+      "plan": "plan/27494b66-e9d3-4b2d-848b-5ce0543abd90/8853b8c9-398b-4b0e-9500-952d4c2cdab7",
+      "languageId": "en-us"
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/plan-listing/2022-03-01-preview3",
+      "id": "plan-listing/27494b66-e9d3-4b2d-848b-5ce0543abd90/public/main/faefdf91-eff5-4e11-aca3-77d015426579/en-us",
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "kind": "azureSaaS-plan",
+      "name": "Enterprise (40+)",
+      "description": "<p>Donec blandit feugiat ligula. Donec hendrerit, felis et imperdiet euismod, purus ipsum pretium metus, in lacinia nulla nisl eget sapien. Donec ut est in lectus consequat consequat.</p><p>Etiam eget dui. Aliquam erat volutpat. Sed at lorem in nunc porta tristique.</p>",
+      "plan": "plan/27494b66-e9d3-4b2d-848b-5ce0543abd90/faefdf91-eff5-4e11-aca3-77d015426579",
+      "languageId": "en-us"
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/price-and-availability-offer/2022-03-01-preview3",
+      "id": "price-and-availability-offer/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "previewAudiences": [
+        {
+          "type": "email",
+          "id": "david@cumulus26.com"
+        },
+        {
+          "type": "email",
+          "id": "julio.colon@cumulus26.com"
+        },
+        {
+          "type": "email",
+          "id": "juhi.saha@partner1.io"
+        }
+      ]
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/price-and-availability-custom-meter/2022-03-01-preview3",
+      "id": "price-and-availability-custom-meter/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "customMeters": {}
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/price-and-availability-plan/2022-03-01-preview4",
+      "id": "price-and-availability-plan/27494b66-e9d3-4b2d-848b-5ce0543abd90/47011245-a5bc-4e3c-b00c-02dca76e0836",
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "plan": "plan/27494b66-e9d3-4b2d-848b-5ce0543abd90/47011245-a5bc-4e3c-b00c-02dca76e0836",
+      "visibility": "visible",
+      "markets": [
+        "us"
+      ],
+      "pricing": {
+        "recurrentPrice": {
+          "recurrentPriceMode": "perUser",
+          "priceInputOption": "usd",
+          "userLimits": {
+            "min": 0,
+            "max": 10
+          },
+          "prices": [
+            {
+              "billingTerm": {
+                "type": "month",
+                "value": 1
+              },
+              "paymentOption": {
+                "type": "month",
+                "value": 1
+              },
+              "pricePerPaymentInUsd": 0
+            },
+            {
+              "billingTerm": {
+                "type": "year",
+                "value": 1
+              },
+              "paymentOption": {
+                "type": "year",
+                "value": 1
+              },
+              "pricePerPaymentInUsd": 0
+            },
+            {
+              "billingTerm": {
+                "type": "year",
+                "value": 2
+              },
+              "paymentOption": {
+                "type": "year",
+                "value": 1
+              },
+              "pricePerPaymentInUsd": 0
+            }
+          ]
+        }
+      },
+      "trial": null,
+      "audience": "public",
+      "privateAudiences": [],
+      "meterDefine": "price-and-availability-custom-meter/27494b66-e9d3-4b2d-848b-5ce0543abd90"
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/price-and-availability-plan/2022-03-01-preview4",
+      "id": "price-and-availability-plan/27494b66-e9d3-4b2d-848b-5ce0543abd90/b9d84b23-b83c-4703-803a-a19358456547",
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "plan": "plan/27494b66-e9d3-4b2d-848b-5ce0543abd90/b9d84b23-b83c-4703-803a-a19358456547",
+      "visibility": "visible",
+      "markets": [
+        "us"
+      ],
+      "pricing": {
+        "recurrentPrice": {
+          "recurrentPriceMode": "perUser",
+          "priceInputOption": "usd",
+          "userLimits": {
+            "min": 10,
+            "max": 20
+          },
+          "prices": [
+            {
+              "billingTerm": {
+                "type": "month",
+                "value": 1
+              },
+              "paymentOption": {
+                "type": "month",
+                "value": 1
+              },
+              "pricePerPaymentInUsd": 0
+            },
+            {
+              "billingTerm": {
+                "type": "year",
+                "value": 1
+              },
+              "paymentOption": {
+                "type": "year",
+                "value": 1
+              },
+              "pricePerPaymentInUsd": 0
+            },
+            {
+              "billingTerm": {
+                "type": "year",
+                "value": 2
+              },
+              "paymentOption": {
+                "type": "year",
+                "value": 1
+              },
+              "pricePerPaymentInUsd": 0
+            }
+          ]
+        }
+      },
+      "trial": null,
+      "audience": "public",
+      "privateAudiences": [],
+      "meterDefine": "price-and-availability-custom-meter/27494b66-e9d3-4b2d-848b-5ce0543abd90"
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/price-and-availability-plan/2022-03-01-preview4",
+      "id": "price-and-availability-plan/27494b66-e9d3-4b2d-848b-5ce0543abd90/f6b99dcd-2608-4aa7-b5e4-151423842dfc",
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "plan": "plan/27494b66-e9d3-4b2d-848b-5ce0543abd90/f6b99dcd-2608-4aa7-b5e4-151423842dfc",
+      "visibility": "visible",
+      "markets": [
+        "us"
+      ],
+      "pricing": {
+        "recurrentPrice": {
+          "recurrentPriceMode": "perUser",
+          "priceInputOption": "usd",
+          "userLimits": {
+            "min": 20,
+            "max": 30
+          },
+          "prices": [
+            {
+              "billingTerm": {
+                "type": "month",
+                "value": 1
+              },
+              "paymentOption": {
+                "type": "month",
+                "value": 1
+              },
+              "pricePerPaymentInUsd": 0
+            },
+            {
+              "billingTerm": {
+                "type": "year",
+                "value": 1
+              },
+              "paymentOption": {
+                "type": "year",
+                "value": 1
+              },
+              "pricePerPaymentInUsd": 0
+            },
+            {
+              "billingTerm": {
+                "type": "year",
+                "value": 2
+              },
+              "paymentOption": {
+                "type": "year",
+                "value": 1
+              },
+              "pricePerPaymentInUsd": 0
+            }
+          ]
+        }
+      },
+      "trial": null,
+      "audience": "public",
+      "privateAudiences": [],
+      "meterDefine": "price-and-availability-custom-meter/27494b66-e9d3-4b2d-848b-5ce0543abd90"
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/price-and-availability-plan/2022-03-01-preview4",
+      "id": "price-and-availability-plan/27494b66-e9d3-4b2d-848b-5ce0543abd90/8853b8c9-398b-4b0e-9500-952d4c2cdab7",
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "plan": "plan/27494b66-e9d3-4b2d-848b-5ce0543abd90/8853b8c9-398b-4b0e-9500-952d4c2cdab7",
+      "visibility": "visible",
+      "markets": [
+        "us"
+      ],
+      "pricing": {
+        "recurrentPrice": {
+          "recurrentPriceMode": "perUser",
+          "priceInputOption": "usd",
+          "userLimits": {
+            "min": 30,
+            "max": 40
+          },
+          "prices": [
+            {
+              "billingTerm": {
+                "type": "month",
+                "value": 1
+              },
+              "paymentOption": {
+                "type": "month",
+                "value": 1
+              },
+              "pricePerPaymentInUsd": 0
+            },
+            {
+              "billingTerm": {
+                "type": "year",
+                "value": 1
+              },
+              "paymentOption": {
+                "type": "year",
+                "value": 1
+              },
+              "pricePerPaymentInUsd": 0
+            },
+            {
+              "billingTerm": {
+                "type": "year",
+                "value": 2
+              },
+              "paymentOption": {
+                "type": "year",
+                "value": 1
+              },
+              "pricePerPaymentInUsd": 0
+            }
+          ]
+        }
+      },
+      "trial": null,
+      "audience": "public",
+      "privateAudiences": [],
+      "meterDefine": "price-and-availability-custom-meter/27494b66-e9d3-4b2d-848b-5ce0543abd90"
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/price-and-availability-plan/2022-03-01-preview4",
+      "id": "price-and-availability-plan/27494b66-e9d3-4b2d-848b-5ce0543abd90/faefdf91-eff5-4e11-aca3-77d015426579",
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "plan": "plan/27494b66-e9d3-4b2d-848b-5ce0543abd90/faefdf91-eff5-4e11-aca3-77d015426579",
+      "visibility": "visible",
+      "markets": [
+        "us"
+      ],
+      "pricing": {
+        "recurrentPrice": {
+          "recurrentPriceMode": "perUser",
+          "priceInputOption": "usd",
+          "userLimits": {
+            "min": 40,
+            "max": 0
+          },
+          "prices": [
+            {
+              "billingTerm": {
+                "type": "month",
+                "value": 1
+              },
+              "paymentOption": {
+                "type": "month",
+                "value": 1
+              },
+              "pricePerPaymentInUsd": 0
+            },
+            {
+              "billingTerm": {
+                "type": "year",
+                "value": 1
+              },
+              "paymentOption": {
+                "type": "year",
+                "value": 1
+              },
+              "pricePerPaymentInUsd": 0
+            },
+            {
+              "billingTerm": {
+                "type": "year",
+                "value": 2
+              },
+              "paymentOption": {
+                "type": "year",
+                "value": 1
+              },
+              "pricePerPaymentInUsd": 0
+            }
+          ]
+        }
+      },
+      "trial": null,
+      "audience": "public",
+      "privateAudiences": [],
+      "meterDefine": "price-and-availability-custom-meter/27494b66-e9d3-4b2d-848b-5ce0543abd90"
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/software-as-a-service-technical-configuration/2022-03-01-preview3",
+      "id": "software-as-a-service-technical-configuration/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "landingPageUrl": "https://ampup.cumulus26.com/landingpage?offerId=519f629d-a6dc-4dd0-bbd0-d77dd4a6bfd4",
+      "connectionWebhook": "https://ampup.cumulus26.com/webhook?offerId=519f629d-a6dc-4dd0-bbd0-d77dd4a6bfd4",
+      "azureAdTenantId": "1fca9262-89e7-4287-b7a1-508a8bd0ab0a",
+      "azureAdAppId": "4e4a6638-778e-4fb0-b584-b91c60c32acc"
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/reseller/2022-03-01-preview2",
+      "id": "reseller/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "resellerChannelState": "none",
+      "audiences": []
+    },
+    {
+      "$schema": "https://schema.mp.microsoft.com/schema/submission/2022-03-01-preview2",
+      "id": "submission/27494b66-e9d3-4b2d-848b-5ce0543abd90/0",
+      "product": "product/27494b66-e9d3-4b2d-848b-5ce0543abd90",
+      "target": {
+        "targetType": "draft"
+      },
+      "lifecycleState": "generallyAvailable"
+    }
+  ]
+}

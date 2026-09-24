@@ -2,7 +2,7 @@ import { Command, Option } from "commander";
 import { printEndpoint, printEndpointJson, printEndpointList } from "./commands/endpoints.js";
 import { callEndpoint, reportFailure, resolveEndpointUrl } from "./commands/request.js";
 import { ApiError } from "./http/pages.js";
-import { OffersManager } from "./offers/manager.js";
+import { OffersManager, TARGET_TYPES, type TargetType } from "./offers/manager.js";
 import { AuthManager, DEFAULT_RESOURCE } from "./auth/manager.js";
 import { getEndpoint, type HttpMethod } from "./urls/index.js";
 
@@ -72,6 +72,34 @@ export function createProgram(): Command {
         const products = await manager.getAllProducts();
         console.error(`Products: ${products.length}`);
         console.log(JSON.stringify(products, null, 2));
+      } catch (error) {
+        if (!(error instanceof ApiError)) {
+          throw error;
+        }
+        reportFailure(error.response);
+      }
+    });
+
+  offers
+    .command("get")
+    .description("Fetch one product and all of its resources")
+    .argument("<productId>", "product durable id, with or without the product/ prefix")
+    .addOption(
+      new Option("--target-type <type>", "environment to read (default: draft)").choices([...TARGET_TYPES]),
+    )
+    .action(async (productId: string, options: { targetType?: TargetType }, command: Command) => {
+      const globals = globalsFrom(command);
+      const manager = new OffersManager({
+        ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
+        locale: globals.locale,
+      });
+      try {
+        const tree = await manager.getProduct(
+          productId,
+          options.targetType !== undefined ? { targetType: options.targetType } : {},
+        );
+        console.error(`Target: ${tree.target?.targetType}, resources: ${tree.resources?.length ?? 0}`);
+        console.log(JSON.stringify(tree, null, 2));
       } catch (error) {
         if (!(error instanceof ApiError)) {
           throw error;
@@ -153,6 +181,7 @@ Examples:
   api-explorer call <id> --query name=value
   api-explorer call products.list --all
   api-explorer offers list
+  api-explorer offers get <productId> --target-type preview
 
 Register APIs in src/urls/bases.ts and add operations in src/urls/catalog.ts.
 The URL builder checks each path template against its declared parameters.
