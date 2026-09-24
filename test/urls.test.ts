@@ -7,12 +7,15 @@ import {
   buildUrl,
   endpoints,
   getEndpoint,
-  getService,
+  services,
   UrlBuildError,
   type Endpoint,
+  type ServiceDefinition,
 } from "../src/urls/index.js";
 
 const BASE = "https://api.example.test";
+
+const example: ServiceDefinition = { description: "Example", defaultBaseUrl: BASE };
 
 const getItem: Endpoint = {
   id: "items.get",
@@ -20,7 +23,7 @@ const getItem: Endpoint = {
   method: "GET",
   summary: "Get one item.",
   path: "/v1/items/{itemId}/parts/{partId}",
-  service: "example",
+  service: example,
   pathParams: [
     { name: "itemId", description: "Item id." },
     { name: "partId", description: "Part id." },
@@ -34,27 +37,43 @@ const getItem: Endpoint = {
 describe("services", () => {
   it("builds the product ingestion base URL from PRODUCT_INGESTION_BASE_URL", () => {
     assert.equal(
-      baseUrlFor("productIngestion", { PRODUCT_INGESTION_BASE_URL: "https://example.test/rp/pi/" }),
+      baseUrlFor(services.productIngestion, { PRODUCT_INGESTION_BASE_URL: "https://example.test/rp/pi/" }),
       "https://example.test/rp/pi",
     );
     assert.equal(
-      baseUrlFor("productIngestion", {}),
+      baseUrlFor(services.productIngestion, {}),
       "https://graph.microsoft.com/rp/product-ingestion",
     );
-    assert.equal(getService("productIngestion").resource, "https://graph.microsoft.com");
+    assert.equal(services.productIngestion.resource, "https://graph.microsoft.com");
   });
 
-  it("builds the products.list URL", () => {
-    const built = buildUrl({ endpoint: getEndpoint("products.list"), baseUrl: "https://graph.microsoft.com/rp/product-ingestion" });
+  it("marks products.list as paged so call follows @nextLink", () => {
+    assert.equal(getEndpoint("products.list").paged, true);
+    assert.notEqual(getEndpoint("product.get").paged, true);
+  });
+
+  it("builds the products.list and product.get URLs", () => {
+    const list = buildUrl({ endpoint: getEndpoint("products.list") });
     assert.equal(
-      built.url.toString(),
+      list.url.toString(),
       "https://graph.microsoft.com/rp/product-ingestion/product?$version=2022-03-01-preview3",
+    );
+    const tree = buildUrl({
+      endpoint: getEndpoint("product.get"),
+      pathParams: { productId: "abc" },
+      query: { targetType: "preview" },
+    });
+    assert.equal(
+      tree.url.toString(),
+      "https://graph.microsoft.com/rp/product-ingestion/resource-tree/product/abc?targetType=preview&$version=2022-03-01-preview5",
     );
   });
 
-  it("rejects an unknown service", () => {
-    assert.throws(() => getService("missing"), UrlBuildError);
-    assert.throws(() => baseUrlFor("missing", {}), UrlBuildError);
+  it("rejects an invalid service base URL", () => {
+    assert.throws(
+      () => baseUrlFor({ description: "Bad", defaultBaseUrl: "http://insecure.test" }, {}),
+      UrlBuildError,
+    );
   });
 
   it("has a valid entry for every catalog endpoint", () => {
@@ -62,7 +81,7 @@ describe("services", () => {
     assert.equal(new Set(ids).size, ids.length);
     for (const endpoint of endpoints) {
       assertEndpointShape(endpoint);
-      assert.doesNotThrow(() => getService(endpoint.service));
+      assert.doesNotThrow(() => baseUrlFor(endpoint.service, {}));
     }
   });
 });

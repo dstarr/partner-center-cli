@@ -1,7 +1,6 @@
-export type HttpMethod = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
+import type { ServiceDefinition } from "./bases.js";
 
-/** Key into the `services` registry in bases.ts. */
-export type ServiceId = string;
+export type HttpMethod = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 
 /** A value substituted into a `{placeholder}` in an endpoint path. */
 export interface PathParam {
@@ -32,9 +31,12 @@ export interface Endpoint {
   summary: string;
   /** Absolute path such as `/v1/items/{itemId}`. Placeholders are `{camelCase}`. */
   path: string;
-  service: ServiceId;
+  /** An entry from `services` in bases.ts. */
+  service: ServiceDefinition;
   pathParams: readonly PathParam[];
   queryParams: readonly QueryParam[];
+  /** Responses are `{ value, @nextLink }` pages; `call` follows every page. */
+  paged?: boolean;
   docsUrl?: string;
 }
 

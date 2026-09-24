@@ -42,8 +42,11 @@ export function printEndpoint(item: Endpoint): void {
   console.log("");
   console.log(item.summary);
   console.log("");
-  console.log(`Service: ${item.service} (${baseUrlFor(item.service)})`);
+  console.log(`Service: ${item.service.description} (${baseUrlFor(item.service)})`);
   console.log(`Group: ${item.group}`);
+  if (item.paged) {
+    console.log("Paged: call follows @nextLink and returns every page");
+  }
   printParams("Path parameters", item.pathParams.map((param) => ({ ...param, required: true })));
   printParams("Query parameters", item.queryParams);
   if (item.docsUrl) {
@@ -80,6 +83,7 @@ function toJson(item: Endpoint) {
     service: item.service,
     pathParams: item.pathParams,
     queryParams: item.queryParams,
+    paged: item.paged === true,
     docsUrl: item.docsUrl ?? null,
   };
 }

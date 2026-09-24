@@ -1,5 +1,3 @@
-import type { ServiceId } from "./types.js";
-
 export interface ServiceDefinition {
   description: string;
   /** https URL, optionally with a path, used when `baseUrlEnv` is unset or blank. */
@@ -10,15 +8,23 @@ export interface ServiceDefinition {
   resource?: string;
 }
 
-/** APIs the catalog can call. Endpoints reference these by key. */
-export const services: Readonly<Record<ServiceId, ServiceDefinition>> = {
+/** APIs the catalog can call. Endpoints reference these objects directly. */
+export const services = {
   productIngestion: {
     description: "Microsoft Marketplace Product Ingestion API (Microsoft Graph)",
     baseUrlEnv: "PRODUCT_INGESTION_BASE_URL",
     defaultBaseUrl: "https://graph.microsoft.com/rp/product-ingestion",
     resource: "https://graph.microsoft.com",
   },
-};
+  productIngestionResourceTree: {
+    description: "Microsoft Marketplace Product Ingestion API (Microsoft Graph)",
+    baseUrlEnv: "PRODUCT_INGESTION_RESOURCE_TREE_BASE_URL",
+    defaultBaseUrl: "https://graph.microsoft.com/rp/product-ingestion/resource-tree",
+    resource: "https://graph.microsoft.com",
+  },
+} as const satisfies Record<string, ServiceDefinition>;
+
+export type ServiceId = keyof typeof services;
 
 export class UrlBuildError extends Error {
   constructor(message: string) {
@@ -27,22 +33,10 @@ export class UrlBuildError extends Error {
   }
 }
 
-export function getService(service: ServiceId): ServiceDefinition {
-  const definition = services[service];
-  if (!definition) {
-    const known = Object.keys(services);
-    throw new UrlBuildError(
-      `Unknown service "${service}". Known services: ${known.length > 0 ? known.join(", ") : "none"}.`,
-    );
-  }
-  return definition;
-}
-
 /** Read at call time because .env is loaded after this module is imported. */
-export function baseUrlFor(service: ServiceId, env: NodeJS.ProcessEnv = process.env): string {
-  const definition = getService(service);
-  const fromEnv = definition.baseUrlEnv ? env[definition.baseUrlEnv]?.trim() : undefined;
-  return normalizeBaseUrl(fromEnv || definition.defaultBaseUrl);
+export function baseUrlFor(service: ServiceDefinition, env: NodeJS.ProcessEnv = process.env): string {
+  const fromEnv = service.baseUrlEnv ? env[service.baseUrlEnv]?.trim() : undefined;
+  return normalizeBaseUrl(fromEnv || service.defaultBaseUrl);
 }
 
 export function normalizeBaseUrl(value: string): string {
@@ -64,7 +58,10 @@ export function normalizeBaseUrl(value: string): string {
   return `${url.origin}${url.pathname.replace(/\/+$/, "")}`;
 }
 
-export function resolveBaseUrl(input: { service: ServiceId; baseUrl?: string }): string {
+export function resolveBaseUrl(input: { 
+  service: ServiceDefinition; 
+  baseUrl?: string 
+}): string {
   if (input.baseUrl !== undefined) {
     return normalizeBaseUrl(input.baseUrl);
   }

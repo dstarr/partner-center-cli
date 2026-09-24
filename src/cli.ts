@@ -147,7 +147,7 @@ export function createProgram(): Command {
       .option("--body <json>", "JSON request body")
       .option("--body-file <path>", "file containing the JSON request body")
       .option("--dry-run", "print the request line without sending it")
-      .option("--all", "follow @nextLink and merge every page's value array")
+      .option("--all", "follow @nextLink and merge every page's value array (automatic for paged endpoints)")
       .option("--timeout <seconds>", "request timeout in seconds", "60"),
   ).action(async (id: string, options: CallOptions, command: Command) => {
     const globals = globalsFrom(command);
@@ -179,7 +179,7 @@ Examples:
   api-explorer describe <id>
   api-explorer url <id> --param name=value --query name=value
   api-explorer call <id> --query name=value
-  api-explorer call products.list --all
+  api-explorer call products.list
   api-explorer offers list
   api-explorer offers get <productId> --target-type preview
 

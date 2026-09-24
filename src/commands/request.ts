@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { AuthManager } from "../auth/manager.js";
-import { buildUrl, getEndpoint, getService } from "../urls/index.js";
+import { buildUrl, getEndpoint } from "../urls/index.js";
 import { sendApiRequest, type ApiResponse } from "../http/client.js";
 import { ApiError, fetchAllPages } from "../http/pages.js";
 import { formatBody, parseAssignments } from "../params.js";
@@ -51,10 +51,10 @@ export async function callEndpoint(input: {
     return;
   }
 
-  const { resource } = getService(endpoint.service);
+  const { resource } = endpoint.service;
   const token = await AuthManager.fromEnv(process.env, resource ? { resource } : {}).getAccessToken();
 
-  if (input.all) {
+  if (input.all || endpoint.paged) {
     try {
       const { items, pages } = await fetchAllPages({
         url,

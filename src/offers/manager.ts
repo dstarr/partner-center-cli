@@ -1,7 +1,7 @@
 import { AuthManager } from "../auth/manager.js";
 import { sendApiRequest } from "../http/client.js";
 import { ApiError, fetchAllPages } from "../http/pages.js";
-import { buildUrl, getEndpoint, getService, type BuildUrlInput } from "../urls/index.js";
+import { buildUrl, getEndpoint, type BuildUrlInput } from "../urls/index.js";
 
 /** A product (offer) resource from the Product Ingestion API. */
 export interface Product {
@@ -50,7 +50,7 @@ export class OffersManager {
     if (auth) {
       this.auth = auth;
     } else {
-      const { resource } = getService(getEndpoint("products.list").service);
+      const { resource } = getEndpoint("products.list").service;
       this.auth = AuthManager.fromEnv(process.env, resource ? { resource } : {});
     }
   }
@@ -83,7 +83,7 @@ export class OffersManager {
     }
 
     const url = this.url({
-      endpoint: getEndpoint("products.get"),
+      endpoint: getEndpoint("product.get"),
       pathParams: { productId: id },
       query: { targetType: options.targetType },
     });

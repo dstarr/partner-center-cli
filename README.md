@@ -7,13 +7,13 @@ Command line tool for exploring REST APIs. Requests are chosen from a catalog of
 | Id | Request | Service |
 | --- | --- | --- |
 | `products.list` | `GET {PRODUCT_INGESTION_BASE_URL}/product?$version={schema-version}` | Product Ingestion API |
-| `products.get` | `GET {PRODUCT_INGESTION_BASE_URL}/resource-tree/product/{productId}?targetType={target}&$version={schema-version}` | Product Ingestion API |
+| `product.get` | `GET {PRODUCT_INGESTION_RESOURCE_TREE_BASE_URL}/product/{productId}?targetType={target}&$version={schema-version}` | Product Ingestion API |
 
-`products.list` returns all offers defined by the publisher. `$version` defaults to `2022-03-01-preview3`. Results are paged, so pass `--all` to follow `@nextLink` and get every product in one `value` array:
+`products.list` returns all offers defined by the publisher. `$version` defaults to `2022-03-01-preview3`. Results are paged. The endpoint is marked `paged: true` in the catalog, so `call` follows `@nextLink` automatically and returns every product in one `value` array:
 
 ```sh
-api-explorer call products.list --all
-api-explorer call products.list --all --query type=softwareAsAService
+api-explorer call products.list
+api-explorer call products.list --query type=softwareAsAService
 api-explorer call products.list --query '$version=2022-03-01-preview3'   # quote $ names in the shell
 ```
 
@@ -22,7 +22,7 @@ api-explorer call products.list --query '$version=2022-03-01-preview3'   # quote
 `OffersManager` in `src/offers/manager.ts` orchestrates calls for products (offers).
 
 - `getAllProducts()` calls the `products.list` URL, follows every `@nextLink`, and returns the products as an array.
-- `getProduct(productId, { targetType })` calls the `products.get` URL and returns the product's resource tree: the product plus its plans, listings, pricing, and submissions. `productId` may include the `product/` prefix. `targetType` is `draft` (the default when omitted), `preview`, or `live`. `$version` defaults to `2022-03-01-preview5`.
+- `getProduct(productId, { targetType })` calls the `product.get` URL and returns the product's resource tree: the product plus its plans, listings, pricing, and submissions. `productId` may include the `product/` prefix. `targetType` is `draft` (the default when omitted), `preview`, or `live`. `$version` defaults to `2022-03-01-preview5`.
 
 ```ts
 const manager = new OffersManager();

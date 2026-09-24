@@ -33,7 +33,7 @@ describe("OffersManager.getProduct", () => {
     let seen = "";
     const manager = new OffersManager({
       auth: fakeAuth(),
-      baseUrl: BASE,
+      baseUrl: `${BASE}/resource-tree`,
       fetchImpl: async (url) => {
         seen = String(url);
         return json(tree);
@@ -54,7 +54,7 @@ describe("OffersManager.getProduct", () => {
     let seen = "";
     const manager = new OffersManager({
       auth: fakeAuth(),
-      baseUrl: BASE,
+      baseUrl: `${BASE}/resource-tree`,
       fetchImpl: async (url) => {
         seen = String(url);
         return json(tree);
@@ -81,7 +81,7 @@ describe("OffersManager.getProduct", () => {
     });
     await assert.rejects(manager.getProduct("abc", { targetType: "live" }), (error: unknown) => {
       assert.ok(error instanceof ApiError);
-      assert.equal(error.response.status, 400);
+      assert.equal((error as ApiError).response.status, 400);
       return true;
     });
   });
@@ -136,7 +136,7 @@ describe("OffersManager.getAllProducts", () => {
     });
     await assert.rejects(manager.getAllProducts(), (error: unknown) => {
       assert.ok(error instanceof ApiError);
-      assert.equal(error.response.status, 403);
+      assert.equal((error as ApiError).response.status, 403);
       return true;
     });
   });

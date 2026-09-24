@@ -1,4 +1,4 @@
-import { getService } from "./bases.js";
+import { baseUrlFor, services } from "./bases.js";
 import { assertEndpointShape } from "./build.js";
 import type { Endpoint, HttpMethod } from "./types.js";
 
@@ -14,7 +14,8 @@ export const endpoints: readonly Endpoint[] = [
     method: "GET",
     summary: "List all offers (products) defined by the publisher.",
     path: "/product",
-    service: "productIngestion",
+    service: services.productIngestion,
+    paged: true,
     pathParams: [],
     queryParams: [
       {
@@ -47,13 +48,14 @@ export const endpoints: readonly Endpoint[] = [
     docsUrl:
       "https://learn.microsoft.com/en-us/partner-center/marketplace-offers/product-ingestion-api#method-3-query-string-parameters",
   }),
+  
   endpoint({
-    id: "products.get",
-    group: "products",
+    id: "product.get",
+    group: "product",
     method: "GET",
     summary: "Get a product and all of its resources (plans, listings, pricing, and so on) as a resource tree.",
-    path: "/resource-tree/product/{productId}",
-    service: "productIngestion",
+    path: "/product/{productId}",
+    service: services.productIngestionResourceTree,
     pathParams: [
       {
         name: "productId",
@@ -107,7 +109,7 @@ export function endpointGroups(): string[] {
 /** Wrap each catalog entry with this so it is validated when the module loads. */
 export function endpoint(definition: Endpoint): Endpoint {
   assertEndpointShape(definition);
-  getService(definition.service);
+  baseUrlFor(definition.service);
   return definition;
 }
 
