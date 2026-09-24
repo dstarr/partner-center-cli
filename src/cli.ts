@@ -93,13 +93,38 @@ export function createProgram(): Command {
         ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
         locale: globals.locale,
       });
+      const target = options.targetType !== undefined ? { targetType: options.targetType } : {};
       try {
-        const tree = await manager.getProduct(
-          productId,
-          options.targetType !== undefined ? { targetType: options.targetType } : {},
-        );
+        const tree = await manager.getProduct(productId, target);
         console.error(`Target: ${tree.target?.targetType}, resources: ${tree.resources?.length ?? 0}`);
         console.log(JSON.stringify(tree, null, 2));
+      } catch (error) {
+        if (!(error instanceof ApiError)) {
+          throw error;
+        }
+        reportFailure(error.response);
+      }
+    });
+
+  offers
+    .command("getSchemas")
+    .description("List the $schema of the product and each of its resources, one per line")
+    .argument("<productId>", "product durable id, with or without the product/ prefix")
+    .addOption(
+      new Option("--target-type <type>", "environment to read (default: draft)").choices([...TARGET_TYPES]),
+    )
+    .action(async (productId: string, options: { targetType?: TargetType }, command: Command) => {
+      const globals = globalsFrom(command);
+      const manager = new ProductsService({
+        ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
+        locale: globals.locale,
+      });
+      const target = options.targetType !== undefined ? { targetType: options.targetType } : {};
+      try {
+        const schemas = await manager.getProductResourceSchemas(productId, target);
+        for (const schema of schemas) {
+          console.log(schema);
+        }
       } catch (error) {
         if (!(error instanceof ApiError)) {
           throw error;
@@ -182,6 +207,7 @@ Examples:
   api-explorer call products.list
   api-explorer offers list
   api-explorer offers get <productId> --target-type preview
+  api-explorer offers getSchemas <productId> --target-type preview
 
 Register APIs in src/urls/bases.ts and add operations in src/urls/catalog.ts.
 The URL builder checks each path template against its declared parameters.

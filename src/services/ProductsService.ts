@@ -67,6 +67,17 @@ export class ProductsService {
   }
 
   /**
+   * Fetches the resource schemas for one product and all of its resources.
+   */
+  async getProductResourceSchemas(
+    productId: string,
+    options: { targetType?: TargetType } = {},
+  ): Promise<string[]> {
+    const product = await this.getProduct(productId, options);
+    return product.resources.map((resource) => resource.$schema);
+  }
+
+  /**
    * Fetches one product and all of its resources.
    * Accepts the durable id with or without the `product/` prefix. Reads the draft unless `targetType` is set.
    */

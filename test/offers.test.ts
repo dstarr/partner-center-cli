@@ -85,6 +85,13 @@ describe("ProductsService.getProduct", () => {
       return true;
     });
   });
+
+  it("getProductResourceSchemas returns each resource's $schema", async () => {
+    const manager = new ProductsService({ auth: fakeAuth(), baseUrl: BASE, fetchImpl: async () => json(tree) });
+    assert.deepEqual(await manager.getProductResourceSchemas("abc", { targetType: "preview" }), [
+      "https://schema.mp.microsoft.com/schema/product/2022-03-01-preview3",
+    ]);
+  });
 });
 
 describe("ProductsService.getAllProducts", () => {

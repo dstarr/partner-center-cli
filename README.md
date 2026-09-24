@@ -35,6 +35,7 @@ From the command line:
 ```sh
 api-explorer offers list
 api-explorer offers get product/27494b66-e9d3-4b2d-848b-5ce0543abd90 --target-type preview
+api-explorer offers getSchemas product/27494b66-e9d3-4b2d-848b-5ce0543abd90 --target-type preview   # one $schema per line
 ```
 
 Microsoft's docs show `targetType="preview"` with quotes, but the API rejects quoted values, so the value is sent without them. `live` returns HTTP 400 for a product that has never been published.
