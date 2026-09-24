@@ -1,6 +1,8 @@
 import { Command, Option } from "commander";
 import { printEndpoint, printEndpointJson, printEndpointList } from "./commands/endpoints.js";
-import { callEndpoint, resolveEndpointUrl } from "./commands/request.js";
+import { callEndpoint, reportFailure, resolveEndpointUrl } from "./commands/request.js";
+import { ApiError } from "./http/pages.js";
+import { OffersManager } from "./offers/manager.js";
 import { AuthManager, DEFAULT_RESOURCE } from "./auth/manager.js";
 import { getEndpoint, type HttpMethod } from "./urls/index.js";
 
@@ -56,6 +58,28 @@ export function createProgram(): Command {
       }
     });
 
+  const offers = program.command("offers").description("Work with products (offers) through the OffersManager");
+  offers
+    .command("list")
+    .description("Fetch every product the publisher has defined")
+    .action(async (_options: unknown, command: Command) => {
+      const globals = globalsFrom(command);
+      const manager = new OffersManager({
+        ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
+        locale: globals.locale,
+      });
+      try {
+        const products = await manager.getAllProducts();
+        console.error(`Products: ${products.length}`);
+        console.log(JSON.stringify(products, null, 2));
+      } catch (error) {
+        if (!(error instanceof ApiError)) {
+          throw error;
+        }
+        reportFailure(error.response);
+      }
+    });
+
   program
     .command("describe")
     .description("Show one endpoint's path, parameters, and docs")
@@ -95,6 +119,7 @@ export function createProgram(): Command {
       .option("--body <json>", "JSON request body")
       .option("--body-file <path>", "file containing the JSON request body")
       .option("--dry-run", "print the request line without sending it")
+      .option("--all", "follow @nextLink and merge every page's value array")
       .option("--timeout <seconds>", "request timeout in seconds", "60"),
   ).action(async (id: string, options: CallOptions, command: Command) => {
     const globals = globalsFrom(command);
@@ -112,6 +137,7 @@ export function createProgram(): Command {
       ...(options.body !== undefined ? { body: options.body } : {}),
       ...(options.bodyFile !== undefined ? { bodyFile: options.bodyFile } : {}),
       dryRun: options.dryRun === true,
+      all: options.all === true,
       timeoutMs: timeoutSeconds * 1000,
     });
   });
@@ -125,6 +151,8 @@ Examples:
   api-explorer describe <id>
   api-explorer url <id> --param name=value --query name=value
   api-explorer call <id> --query name=value
+  api-explorer call products.list --all
+  api-explorer offers list
 
 Register APIs in src/urls/bases.ts and add operations in src/urls/catalog.ts.
 The URL builder checks each path template against its declared parameters.
@@ -149,6 +177,7 @@ interface CallOptions extends RequestOptions {
   body?: string;
   bodyFile?: string;
   dryRun?: boolean;
+  all?: boolean;
   timeout: string;
 }
 

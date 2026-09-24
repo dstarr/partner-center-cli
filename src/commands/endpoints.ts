@@ -1,4 +1,5 @@
 import type { Endpoint, HttpMethod } from "../urls/types.js";
+import { baseUrlFor } from "../urls/bases.js";
 import { endpointGroups, listEndpoints } from "../urls/catalog.js";
 
 export function printEndpointList(filter: { group?: string; method?: HttpMethod }): void {
@@ -41,7 +42,7 @@ export function printEndpoint(item: Endpoint): void {
   console.log("");
   console.log(item.summary);
   console.log("");
-  console.log(`Service: ${item.service}`);
+  console.log(`Service: ${item.service} (${baseUrlFor(item.service)})`);
   console.log(`Group: ${item.group}`);
   printParams("Path parameters", item.pathParams.map((param) => ({ ...param, required: true })));
   printParams("Query parameters", item.queryParams);
@@ -53,7 +54,7 @@ export function printEndpoint(item: Endpoint): void {
 
 function printParams(
   title: string,
-  params: readonly { name: string; description: string; required: boolean }[],
+  params: readonly { name: string; description: string; required: boolean; default?: string }[],
 ): void {
   console.log("");
   console.log(title);
@@ -63,7 +64,8 @@ function printParams(
   }
   for (const param of params) {
     const requirement = param.required ? "required" : "optional";
-    console.log(`  ${param.name}  ${requirement}`);
+    const fallback = param.default !== undefined ? `, default ${param.default}` : "";
+    console.log(`  ${param.name}  ${requirement}${fallback}`);
     console.log(`    ${param.description}`);
   }
 }

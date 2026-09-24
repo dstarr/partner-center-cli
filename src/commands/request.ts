@@ -1,7 +1,8 @@
 import { readFile } from "node:fs/promises";
 import { AuthManager } from "../auth/manager.js";
 import { buildUrl, getEndpoint, getService } from "../urls/index.js";
-import { sendApiRequest } from "../http/client.js";
+import { sendApiRequest, type ApiResponse } from "../http/client.js";
+import { ApiError, fetchAllPages } from "../http/pages.js";
 import { formatBody, parseAssignments } from "../params.js";
 
 export function resolveEndpointUrl(input: {
@@ -33,22 +34,47 @@ export async function callEndpoint(input: {
   bodyFile?: string;
   dryRun: boolean;
   timeoutMs: number;
+  all?: boolean;
 }): Promise<void> {
   const endpoint = getEndpoint(input.id);
   const body = await readBody(input.body, input.bodyFile);
   if (body !== undefined && endpoint.method === "GET") {
     throw new Error(`${endpoint.id} is a GET and does not take a body.`);
   }
+  if (input.all && endpoint.method !== "GET") {
+    throw new Error("--all only applies to GET endpoints.");
+  }
 
   const url = resolveEndpointUrl(input);
-  console.error(`${endpoint.method} ${url.toString()}`);
   if (input.dryRun) {
+    console.error(`${endpoint.method} ${url.toString()}`);
     return;
   }
 
   const { resource } = getService(endpoint.service);
   const token = await AuthManager.fromEnv(process.env, resource ? { resource } : {}).getAccessToken();
 
+  if (input.all) {
+    try {
+      const { items, pages } = await fetchAllPages({
+        url,
+        accessToken: token,
+        locale: input.locale,
+        timeoutMs: input.timeoutMs,
+        onRequest: (next) => console.error(`GET ${next.toString()}`),
+      });
+      console.error(`Pages: ${pages}, items: ${items.length}`);
+      process.stdout.write(`${JSON.stringify({ value: items }, null, 2)}\n`);
+    } catch (error) {
+      if (!(error instanceof ApiError)) {
+        throw error;
+      }
+      reportFailure(error.response);
+    }
+    return;
+  }
+
+  console.error(`${endpoint.method} ${url.toString()}`);
   const response = await sendApiRequest({
     url,
     method: endpoint.method,
@@ -58,18 +84,21 @@ export async function callEndpoint(input: {
     timeoutMs: input.timeoutMs,
   });
 
-  console.error(`HTTP ${response.status}`);
-  console.error(`MS-RequestId: ${response.requestId}`);
-  console.error(`MS-CorrelationId: ${response.correlationId}`);
-
-  const formatted = formatBody(response.bodyText);
-  if (response.ok) {
-    if (formatted.length > 0) {
-      process.stdout.write(formatted);
-    }
+  if (!response.ok) {
+    reportFailure(response);
     return;
   }
+  printTrace(response);
+  const formatted = formatBody(response.bodyText);
+  if (formatted.length > 0) {
+    process.stdout.write(formatted);
+  }
+}
 
+/** Writes a failed response to stderr and sets a failing exit code. */
+export function reportFailure(response: ApiResponse): void {
+  printTrace(response);
+  const formatted = formatBody(response.bodyText);
   if (formatted.length > 0) {
     process.stderr.write(formatted);
   } else if (response.status === 401 || response.status === 403) {
@@ -78,6 +107,12 @@ export async function callEndpoint(input: {
     );
   }
   process.exitCode = 1;
+}
+
+function printTrace(response: ApiResponse): void {
+  console.error(`HTTP ${response.status}`);
+  console.error(`MS-RequestId: ${response.requestId}`);
+  console.error(`MS-CorrelationId: ${response.correlationId}`);
 }
 
 async function readBody(body: string | undefined, bodyFile: string | undefined): Promise<string | undefined> {

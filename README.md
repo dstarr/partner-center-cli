@@ -2,7 +2,35 @@
 
 Command line tool for exploring REST APIs. Requests are chosen from a catalog of endpoints, so URLs are built from one path template instead of being assembled at each call site.
 
-The catalog is currently empty. Register an API and add its endpoints as described below.
+## Supported endpoints
+
+| Id | Request | Service |
+| --- | --- | --- |
+| `products.list` | `GET {PRODUCT_INGESTION_BASE_URL}/product?$version={schema-version}` | Product Ingestion API |
+
+`products.list` returns all offers defined by the publisher. `$version` defaults to `2022-03-01-preview3`. Results are paged, so pass `--all` to follow `@nextLink` and get every product in one `value` array:
+
+```sh
+api-explorer call products.list --all
+api-explorer call products.list --all --query type=softwareAsAService
+api-explorer call products.list --query '$version=2022-03-01-preview3'   # quote $ names in the shell
+```
+
+## OffersManager
+
+`OffersManager` in `src/offers/manager.ts` orchestrates calls for products (offers). `getAllProducts()` calls the `products.list` URL, follows every `@nextLink`, and returns the products as an array.
+
+```ts
+const products = await new OffersManager().getAllProducts();
+```
+
+From the command line:
+
+```sh
+api-explorer offers list
+```
+
+The Product Ingestion API requests tokens for `https://graph.microsoft.com`. See the [Product Ingestion API docs](https://learn.microsoft.com/en-us/partner-center/marketplace-offers/product-ingestion-api).
 
 ## Setup
 
@@ -22,6 +50,7 @@ Settings are read from a `.env` file in the current directory using [dotenv](htt
 | `PARTNER_CENTER_TENANT_ID` | none | none |
 | `PARTNER_CENTER_CLIENT_ID` | none | none |
 | `PARTNER_CENTER_CLIENT_SECRET` | none | none |
+| `PRODUCT_INGESTION_BASE_URL` | `--base-url` | `https://graph.microsoft.com/rp/product-ingestion` |
 | `PARTNER_CENTER_LOCALE` | `--locale` | `en-US` |
 
 A flag overrides the environment. A variable already set in your shell overrides `.env`. Blank entries count as unset.
@@ -56,7 +85,7 @@ api-explorer auth --resource https://api.example.com       # request a token for
 api-explorer endpoints [--group <group>] [--method GET] [--json]
 api-explorer describe <id>
 api-explorer url <id> --param name=value --query name=value
-api-explorer call <id> --param name=value --query name=value [--body <json> | --body-file <path>] [--dry-run]
+api-explorer call <id> --param name=value --query name=value [--body <json> | --body-file <path>] [--dry-run] [--all]
 ```
 
 `url` only prints the resolved URL. `call` sends it. The response body is written to stdout; the request line, status, `MS-RequestId`, and `MS-CorrelationId` are written to stderr.
@@ -71,7 +100,7 @@ api-explorer call <id> --param name=value --query name=value [--body <json> | --
    export const services: Readonly<Record<ServiceId, ServiceDefinition>> = {
      example: {
        description: "Example API",
-       defaultBaseUrl: "https://api.example.com",
+       defaultBaseUrl: "https://api.example.com", // may include a path
        baseUrlEnv: "EXAMPLE_BASE_URL", // optional override read from .env
        resource: "https://api.example.com", // optional token audience; defaults to DEFAULT_RESOURCE
      },

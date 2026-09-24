@@ -14,6 +14,8 @@ export interface QueryParam {
   name: string;
   description: string;
   required: boolean;
+  /** Sent when the caller does not pass a value. */
+  default?: string;
 }
 
 /**
@@ -38,7 +40,7 @@ export interface Endpoint {
 
 export interface BuildUrlInput {
   endpoint: Endpoint;
-  /** Replaces the service base URL for this call. Must be an https origin. */
+  /** Replaces the service base URL for this call. Must be an https URL without a query or hash. */
   baseUrl?: string;
   pathParams?: Readonly<Record<string, string | number>>;
   query?: Readonly<Record<string, string | number | boolean | undefined | null>>;

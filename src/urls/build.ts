@@ -1,5 +1,5 @@
 import { resolveBaseUrl, UrlBuildError } from "./bases.js";
-import type { BuildUrlInput, BuiltRequest, Endpoint } from "./types.js";
+import type { BuildUrlInput, BuiltRequest, Endpoint, QueryParam } from "./types.js";
 
 const PLACEHOLDER = /\{([A-Za-z][A-Za-z0-9]*)\}/g;
 const ANY_BRACE = /\{[^}]*\}/g;
@@ -93,11 +93,13 @@ export function buildUrl(input: BuildUrlInput): BuiltRequest {
     service: endpoint.service,
     ...(input.baseUrl !== undefined ? { baseUrl: input.baseUrl } : {}),
   });
-  const url = new URL(path, `${baseUrl}/`);
+  const url = new URL(`${baseUrl}${path}`);
 
+  const valueFor = (param: QueryParam) => query[param.name] ?? param.default;
+  const pairs: [string, string][] = [];
   const declaredQuery = new Set(endpoint.queryParams.map((param) => param.name));
   const missingQuery = endpoint.queryParams.filter(
-    (param) => param.required && (query[param.name] === undefined || query[param.name] === null),
+    (param) => param.required && valueFor(param) === undefined,
   );
   if (missingQuery.length > 0) {
     const names = missingQuery.map((param) => `"${param.name}"`).join(", ");
@@ -108,11 +110,11 @@ export function buildUrl(input: BuildUrlInput): BuiltRequest {
     );
   }
   for (const param of endpoint.queryParams) {
-    const raw = query[param.name];
-    if (raw === undefined || raw === null) {
+    const raw = valueFor(param);
+    if (raw === undefined) {
       continue;
     }
-    url.searchParams.append(param.name, String(raw));
+    pairs.push([param.name, String(raw)]);
   }
 
   const extras = Object.keys(query)
@@ -134,8 +136,9 @@ export function buildUrl(input: BuildUrlInput): BuiltRequest {
     if (raw === undefined || raw === null) {
       continue;
     }
-    url.searchParams.append(name, String(raw));
+    pairs.push([name, String(raw)]);
   }
+  url.search = encodeQuery(pairs);
 
   return {
     endpoint,
@@ -174,6 +177,16 @@ function assertUnique(id: string, kind: string, names: readonly string[]): void 
     }
     seen.add(name);
   }
+}
+
+/** OData-style names such as `$version` keep a literal `$`; everything else is percent-encoded. */
+function encodeQuery(pairs: readonly [string, string][]): string {
+  return pairs
+    .map(([name, value]) => {
+      const encodedName = encodeURIComponent(name).replace(/^%24/, "$");
+      return `${encodedName}=${encodeURIComponent(value)}`;
+    })
+    .join("&");
 }
 
 function formatNames(names: readonly string[]): string {

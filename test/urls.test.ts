@@ -6,6 +6,7 @@ import {
   baseUrlFor,
   buildUrl,
   endpoints,
+  getEndpoint,
   getService,
   UrlBuildError,
   type Endpoint,
@@ -31,6 +32,26 @@ const getItem: Endpoint = {
 };
 
 describe("services", () => {
+  it("builds the product ingestion base URL from PRODUCT_INGESTION_BASE_URL", () => {
+    assert.equal(
+      baseUrlFor("productIngestion", { PRODUCT_INGESTION_BASE_URL: "https://example.test/rp/pi/" }),
+      "https://example.test/rp/pi",
+    );
+    assert.equal(
+      baseUrlFor("productIngestion", {}),
+      "https://graph.microsoft.com/rp/product-ingestion",
+    );
+    assert.equal(getService("productIngestion").resource, "https://graph.microsoft.com");
+  });
+
+  it("builds the products.list URL", () => {
+    const built = buildUrl({ endpoint: getEndpoint("products.list"), baseUrl: "https://graph.microsoft.com/rp/product-ingestion" });
+    assert.equal(
+      built.url.toString(),
+      "https://graph.microsoft.com/rp/product-ingestion/product?$version=2022-03-01-preview3",
+    );
+  });
+
   it("rejects an unknown service", () => {
     assert.throws(() => getService("missing"), UrlBuildError);
     assert.throws(() => baseUrlFor("missing", {}), UrlBuildError);
@@ -120,10 +141,41 @@ describe("buildUrl", () => {
     );
   });
 
-  it("rejects a base URL that is not an https origin", () => {
+  it("keeps the path of a base URL", () => {
+    const built = buildUrl({
+      endpoint: getItem,
+      baseUrl: `${BASE}/rp/workload/`,
+      pathParams: { itemId: "a", partId: "b" },
+      query: { country: "US" },
+    });
+    assert.equal(built.url.toString(), `${BASE}/rp/workload/v1/items/a/parts/b?country=US`);
+  });
+
+  it("rejects a base URL that is not https or has a query", () => {
     const input = { endpoint: getItem, pathParams: { itemId: "a", partId: "b" }, query: { country: "US" } };
-    assert.throws(() => buildUrl({ ...input, baseUrl: `${BASE}/v2` }), UrlBuildError);
+    assert.throws(() => buildUrl({ ...input, baseUrl: `${BASE}?x=1` }), UrlBuildError);
     assert.throws(() => buildUrl({ ...input, baseUrl: "http://api.example.test" }), UrlBuildError);
+  });
+
+  it("sends query defaults and keeps a literal $ in OData names", () => {
+    const endpoint: Endpoint = {
+      ...getItem,
+      path: "/items",
+      pathParams: [],
+      queryParams: [
+        { name: "$version", description: "Schema.", required: true, default: "2022-03-01-preview3" },
+        { name: "type", description: "Type.", required: false },
+      ],
+    };
+    const defaulted = buildUrl({ endpoint, baseUrl: BASE });
+    assert.equal(defaulted.url.toString(), `${BASE}/items?$version=2022-03-01-preview3`);
+    const overridden = buildUrl({
+      endpoint,
+      baseUrl: BASE,
+      query: { $version: "2023-01-01", type: "a b&c" },
+    });
+    assert.equal(overridden.url.toString(), `${BASE}/items?$version=2023-01-01&type=a%20b%26c`);
+    assert.equal(overridden.url.searchParams.get("type"), "a b&c");
   });
 });
 

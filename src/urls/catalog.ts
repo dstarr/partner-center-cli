@@ -7,7 +7,47 @@ import type { Endpoint, HttpMethod } from "./types.js";
  * Each entry is checked against its path template and service when the module loads.
  * To explore a new operation, add it here instead of building a URL by hand.
  */
-export const endpoints: readonly Endpoint[] = [];
+export const endpoints: readonly Endpoint[] = [
+  endpoint({
+    id: "products.list",
+    group: "products",
+    method: "GET",
+    summary: "List all offers (products) defined by the publisher.",
+    path: "/product",
+    service: "productIngestion",
+    pathParams: [],
+    queryParams: [
+      {
+        name: "$version",
+        description: "Schema version of the response. The latest version at or below this is returned.",
+        required: true,
+        default: "2022-03-01-preview3",
+      },
+      {
+        name: "type",
+        description: "Product type filter, for example softwareAsAService, azureContainer, or azureVirtualMachine.",
+        required: false,
+      },
+      {
+        name: "externalID",
+        description: "Return the product with this external ID (offer ID).",
+        required: false,
+      },
+      {
+        name: "$maxpagesize",
+        description: "Maximum number of products per page.",
+        required: false,
+      },
+      {
+        name: "continuationToken",
+        description: "Token from the previous page's response, used to get the next page.",
+        required: false,
+      },
+    ],
+    docsUrl:
+      "https://learn.microsoft.com/en-us/partner-center/marketplace-offers/product-ingestion-api#method-3-query-string-parameters",
+  }),
+];
 
 const byId = new Map(endpoints.map((item) => [item.id, item]));
 
