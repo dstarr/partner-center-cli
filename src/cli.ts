@@ -2,6 +2,7 @@ import { Command, Option } from "commander";
 import { printEndpoint, printEndpointJson, printEndpointList } from "./commands/endpoints.js";
 import { callEndpoint, reportFailure, resolveEndpointUrl } from "./commands/request.js";
 import { ApiError } from "./http/pages.js";
+import { ProductParser, ProductSchemas } from "./services/products-parser.js";
 import { ProductsService, TARGET_TYPES, type TargetType } from "./services/products-service.js";
 import { AuthManager, DEFAULT_RESOURCE } from "./auth/manager.js";
 import { getEndpoint, type HttpMethod } from "./urls/index.js";
@@ -21,6 +22,10 @@ export function createProgram(): Command {
         .env("PARTNER_CENTER_LOCALE")
         .default("en-US"),
     );
+
+    const offers = program.command("offers").description("Work with products (offers) through the ProductsService");
+    createOfferCommands(offers);
+
 
   program
     .command("endpoints")
@@ -55,81 +60,6 @@ export function createProgram(): Command {
       console.error(`client-request-id: ${token.clientRequestId}`);
       if (options.printToken) {
         console.log(token.accessToken);
-      }
-    });
-
-  const offers = program.command("offers").description("Work with products (offers) through the ProductsService");
-  offers
-    .command("list")
-    .description("Fetch every product the publisher has defined")
-    .action(async (_options: unknown, command: Command) => {
-      const globals = globalsFrom(command);
-      const manager = new ProductsService({
-        ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
-        locale: globals.locale,
-      });
-      try {
-        const products = await manager.getAllProducts();
-        console.error(`Products: ${products.length}`);
-        console.log(JSON.stringify(products, null, 2));
-      } catch (error) {
-        if (!(error instanceof ApiError)) {
-          throw error;
-        }
-        reportFailure(error.response);
-      }
-    });
-
-  offers
-    .command("get")
-    .description("Fetch one product and all of its resources")
-    .argument("<productId>", "product durable id, with or without the product/ prefix")
-    .addOption(
-      new Option("--target-type <type>", "environment to read (default: draft)").choices([...TARGET_TYPES]),
-    )
-    .action(async (productId: string, options: { targetType?: TargetType }, command: Command) => {
-      const globals = globalsFrom(command);
-      const manager = new ProductsService({
-        ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
-        locale: globals.locale,
-      });
-      const target = options.targetType !== undefined ? { targetType: options.targetType } : {};
-      try {
-        const tree = await manager.getProduct(productId, target);
-        console.error(`Target: ${tree.target?.targetType}, resources: ${tree.resources?.length ?? 0}`);
-        console.log(JSON.stringify(tree, null, 2));
-      } catch (error) {
-        if (!(error instanceof ApiError)) {
-          throw error;
-        }
-        reportFailure(error.response);
-      }
-    });
-
-  offers
-    .command("getSchemas")
-    .description("List the $schema of the product and each of its resources, one per line")
-    .argument("<productId>", "product durable id, with or without the product/ prefix")
-    .addOption(
-      new Option("--target-type <type>", "environment to read (default: draft)").choices([...TARGET_TYPES]),
-    )
-    .action(async (productId: string, options: { targetType?: TargetType }, command: Command) => {
-      const globals = globalsFrom(command);
-      const manager = new ProductsService({
-        ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
-        locale: globals.locale,
-      });
-      const target = options.targetType !== undefined ? { targetType: options.targetType } : {};
-      try {
-        const schemas = await manager.getProductResourceSchemas(productId, target);
-        for (const schema of schemas) {
-          console.log(schema);
-        }
-      } catch (error) {
-        if (!(error instanceof ApiError)) {
-          throw error;
-        }
-        reportFailure(error.response);
       }
     });
 
@@ -208,6 +138,7 @@ Examples:
   api-explorer offers list
   api-explorer offers get <productId> --target-type preview
   api-explorer offers getSchemas <productId> --target-type preview
+  api-explorer offers resourceIds <productId> --schema Plan
 
 Register APIs in src/urls/bases.ts and add operations in src/urls/catalog.ts.
 The URL builder checks each path template against its declared parameters.
@@ -234,6 +165,120 @@ interface CallOptions extends RequestOptions {
   dryRun?: boolean;
   all?: boolean;
   timeout: string;
+}
+
+function createOfferCommands(offers: Command) {
+
+  offers
+    .command("list")
+    .description("Fetch every product the publisher has defined")
+    .action(async (_options: unknown, command: Command) => {
+      const globals = globalsFrom(command);
+      const manager = new ProductsService({
+        ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
+        locale: globals.locale,
+      });
+      try {
+        const products = await manager.getAllProducts();
+        console.error(`Products: ${products.length}`);
+        console.log(JSON.stringify(products, null, 2));
+      } catch (error) {
+        if (!(error instanceof ApiError)) {
+          throw error;
+        }
+        reportFailure(error.response);
+      }
+    });
+
+  offers
+    .command("get")
+    .description("Fetch one product and all of its resources")
+    .argument("<productId>", "product durable id, with or without the product/ prefix")
+    .addOption(
+      new Option("--target-type <type>", "environment to read (default: draft)").choices([...TARGET_TYPES])
+    )
+    .action(async (productId: string, options: { targetType?: TargetType; }, command: Command) => {
+      const globals = globalsFrom(command);
+      const manager = new ProductsService({
+        ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
+        locale: globals.locale,
+      });
+      const target = options.targetType !== undefined ? { targetType: options.targetType } : {};
+      try {
+        const tree = await manager.getProduct(productId, target);
+        console.error(`Target: ${tree.target?.targetType}, resources: ${tree.resources?.length ?? 0}`);
+        console.log(JSON.stringify(tree, null, 2));
+      } catch (error) {
+        if (!(error instanceof ApiError)) {
+          throw error;
+        }
+        reportFailure(error.response);
+      }
+    });
+
+  offers
+    .command("getSchemas")
+    .description("List the $schema of the product and each of its resources, one per line")
+    .argument("<productId>", "product durable id, with or without the product/ prefix")
+    .addOption(
+      new Option("--target-type <type>", "environment to read (default: draft)").choices([...TARGET_TYPES])
+    )
+    .action(async (productId: string, options: { targetType?: TargetType; }, command: Command) => {
+      const globals = globalsFrom(command);
+      const manager = new ProductsService({
+        ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
+        locale: globals.locale,
+      });
+      const target = options.targetType !== undefined ? { targetType: options.targetType } : {};
+      try {
+        const schemas = await manager.getProductResourceSchemas(productId, target);
+        for (const schema of schemas) {
+          console.log(schema);
+        }
+      } catch (error) {
+        if (!(error instanceof ApiError)) {
+          throw error;
+        }
+        reportFailure(error.response);
+      }
+    });
+
+  offers
+    .command("resourceIds")
+    .description("List the ids of the product and each of its resources, one per line")
+    .argument("<productId>", "product durable id, with or without the product/ prefix")
+    .addOption(
+      new Option("--target-type <type>", "environment to read (default: draft)").choices([...TARGET_TYPES])
+    )
+    .addOption(
+      new Option("--schema <name>", "only resources that use this schema").choices(Object.keys(ProductSchemas))
+    )
+    .action(
+      async (
+        productId: string,
+        options: { targetType?: TargetType; schema?: keyof typeof ProductSchemas },
+        command: Command,
+      ) => {
+        const globals = globalsFrom(command);
+        const manager = new ProductsService({
+          ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
+          locale: globals.locale,
+        });
+        const target = options.targetType !== undefined ? { targetType: options.targetType } : {};
+        try {
+          const product = await manager.getProduct(productId, target);
+          const schema = options.schema !== undefined ? ProductSchemas[options.schema] : undefined;
+          for (const id of new ProductParser().getResourceIds(product, schema)) {
+            console.log(id);
+          }
+        } catch (error) {
+          if (!(error instanceof ApiError)) {
+            throw error;
+          }
+          reportFailure(error.response);
+        }
+      },
+    );
 }
 
 function globalsFrom(command: Command): GlobalOptions {

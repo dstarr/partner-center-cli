@@ -19,13 +19,20 @@ export type TargetType = "draft" | "preview" | "live";
 
 export const TARGET_TYPES: readonly TargetType[] = ["draft", "preview", "live"];
 
+/** One resource in a product resource tree, such as a plan, listing, or submission. */
+export interface ProductResource {
+  $schema: string;
+  id?: string;
+  [property: string]: unknown;
+}
+
 /** A product and every resource under it (plans, listings, pricing, submissions, and so on). */
 export interface ProductResourceTree {
   $schema: string;
   /** Durable id of the product, such as `product/27494b66-...`. */
   root: string;
   target: { targetType: TargetType };
-  resources: Array<{ $schema: string; id?: string; [property: string]: unknown }>;
+  resources: ProductResource[];
   [property: string]: unknown;
 }
 
