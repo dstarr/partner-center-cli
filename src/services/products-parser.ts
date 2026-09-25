@@ -2,8 +2,14 @@ import type { ProductResource, ProductResourceTree } from "./products-service.js
 
 /** Picks resources out of a product resource tree by the `$schema` they use. */
 export class ProductParser {
-  /** Returns every resource in the product whose `$schema` equals `schema`, in tree order. */
-  getResources(product: ProductResourceTree, schema: ProductSchemas): ProductResource[] {
+  /**
+   * Returns the product's resources in tree order.
+   * Pass `schema` to only include resources whose `$schema` equals it.
+   */
+  getResources(product: ProductResourceTree, schema?: ProductSchemas): ProductResource[] {
+    if (schema === undefined) {
+      return [...product.resources];
+    }
     return product.resources.filter((resource) => resource.$schema === schema);
   }
 
@@ -12,8 +18,9 @@ export class ProductParser {
    * Pass `schema` to only include resources that use it. Resources without an id are skipped.
    */
   getResourceIds(product: ProductResourceTree, schema?: ProductSchemas): string[] {
-    const resources = schema === undefined ? product.resources : this.getResources(product, schema);
-    return resources.flatMap((resource) => (typeof resource.id === "string" ? [resource.id] : []));
+    return this.getResources(product, schema).flatMap((resource) =>
+      typeof resource.id === "string" ? [resource.id] : [],
+    );
   }
 }
 

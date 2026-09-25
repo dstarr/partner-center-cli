@@ -138,7 +138,8 @@ Examples:
   api-explorer products list
   api-explorer products get <productId> --target-type preview
   api-explorer products getSchemas <productId> --target-type preview
-  api-explorer products resourceIds <productId> --schema Plan
+  api-explorer products getResourceIds <productId> --schema Plan
+  api-explorer products getResources <productId> --schema Plan
 
 Register APIs in src/urls/bases.ts and add operations in src/urls/catalog.ts.
 The URL builder checks each path template against its declared parameters.
@@ -244,7 +245,7 @@ function createProductCommands(productsCommand: Command) {
     });
 
   productsCommand
-    .command("resourceIds")
+    .command("getResourceIds")
     .description("List the ids of the product and each of its resources, one per line")
     .argument("<productId>", "product durable id, with or without the product/ prefix")
     .addOption(
@@ -270,6 +271,43 @@ function createProductCommands(productsCommand: Command) {
           const schema = options.schema !== undefined ? ProductSchemas[options.schema] : undefined;
           for (const id of new ProductParser().getResourceIds(product, schema)) {
             console.log(id);
+          }
+        } catch (error) {
+          if (!(error instanceof ApiError)) {
+            throw error;
+          }
+          reportFailure(error.response);
+        }
+      },
+    );
+
+  productsCommand
+    .command("getResources")
+    .description("Print each resource in the product as one line of JSON (JSON Lines)")
+    .argument("<productId>", "product durable id, with or without the product/ prefix")
+    .addOption(
+      new Option("--target-type <type>", "environment to read (default: draft)").choices([...TARGET_TYPES])
+    )
+    .addOption(
+      new Option("--schema <name>", "only resources that use this schema").choices(Object.keys(ProductSchemas))
+    )
+    .action(
+      async (
+        productId: string,
+        options: { targetType?: TargetType; schema?: keyof typeof ProductSchemas },
+        command: Command,
+      ) => {
+        const globals = globalsFrom(command);
+        const manager = new ProductsService({
+          ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
+          locale: globals.locale,
+        });
+        const target = options.targetType !== undefined ? { targetType: options.targetType } : {};
+        try {
+          const product = await manager.getProduct(productId, target);
+          const schema = options.schema !== undefined ? ProductSchemas[options.schema] : undefined;
+          for (const resource of new ProductParser().getResources(product, schema)) {
+            console.log(JSON.stringify(resource));
           }
         } catch (error) {
           if (!(error instanceof ApiError)) {

@@ -26,6 +26,10 @@ describe("ProductParser.getResources", () => {
     );
   });
 
+  it("returns every resource when no schema is given", () => {
+    assert.equal(parser.getResources(product).length, product.resources.length);
+  });
+
   it("returns an empty array when nothing matches", () => {
     assert.deepEqual(parser.getResources(product, ProductSchemas.Submission), []);
   });
