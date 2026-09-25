@@ -19,7 +19,7 @@ api-explorer call products.list --query '$version=2022-03-01-preview3'   # quote
 
 ## ProductsService
 
-`ProductsService` in `src/services/ProductsService.ts` orchestrates calls for products (offers).
+`ProductsService` in `src/services/products-service.ts` orchestrates calls for products (offers).
 
 - `getAllProducts()` calls the `products.list` URL, follows every `@nextLink`, and returns the products as an array.
 - `getProduct(productId, { targetType })` calls the `product.get` URL and returns the product's resource tree: the product plus its plans, listings, pricing, and submissions. `productId` may include the `product/` prefix. `targetType` is `draft` (the default when omitted), `preview`, or `live`. `$version` defaults to `2022-03-01-preview5`.

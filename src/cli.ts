@@ -2,7 +2,7 @@ import { Command, Option } from "commander";
 import { printEndpoint, printEndpointJson, printEndpointList } from "./commands/endpoints.js";
 import { callEndpoint, reportFailure, resolveEndpointUrl } from "./commands/request.js";
 import { ApiError } from "./http/pages.js";
-import { ProductsService, TARGET_TYPES, type TargetType } from "./services/ProductsService.js";
+import { ProductsService, TARGET_TYPES, type TargetType } from "./services/products-service.js";
 import { AuthManager, DEFAULT_RESOURCE } from "./auth/manager.js";
 import { getEndpoint, type HttpMethod } from "./urls/index.js";
 

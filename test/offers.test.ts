@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { AuthManager } from "../src/auth/manager.js";
 import { ApiError } from "../src/http/pages.js";
-import { ProductsService } from "../src/services/ProductsService.js";
+import { ProductsService } from "../src/services/products-service.js";
 
 const BASE = "https://graph.example.test/rp/product-ingestion";
 
