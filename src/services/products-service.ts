@@ -3,7 +3,7 @@ import { sendApiRequest } from "../http/client.js";
 import { ApiError, fetchAllPages } from "../http/pages.js";
 import { buildUrl, getEndpoint, type BuildUrlInput } from "../urls/index.js";
 
-/** A product (offer) resource from the Product Ingestion API. */
+/** A product resource from the Product Ingestion API. */
 export interface Product {
   $schema: string;
   /** Durable id, such as `product/27494b66-...`. */
@@ -46,7 +46,7 @@ export interface ProductsServiceOptions {
   fetchImpl?: typeof fetch;
 }
 
-/** Orchestrates calls for products (offers) defined in Partner Center. */
+/** Orchestrates calls for products defined in Partner Center. */
 export class ProductsService {
   private readonly auth: AuthManager;
   private readonly options: Omit<ProductsServiceOptions, "auth">;

@@ -9,7 +9,7 @@ Command line tool for exploring REST APIs. Requests are chosen from a catalog of
 | `products.list` | `GET {PRODUCT_INGESTION_BASE_URL}/product?$version={schema-version}` | Product Ingestion API |
 | `product.get` | `GET {PRODUCT_INGESTION_RESOURCE_TREE_BASE_URL}/product/{productId}?targetType={target}&$version={schema-version}` | Product Ingestion API |
 
-`products.list` returns all offers defined by the publisher. `$version` defaults to `2022-03-01-preview3`. Results are paged. The endpoint is marked `paged: true` in the catalog, so `call` follows `@nextLink` automatically and returns every product in one `value` array:
+`products.list` returns all products defined by the publisher. `$version` defaults to `2022-03-01-preview3`. Results are paged. The endpoint is marked `paged: true` in the catalog, so `call` follows `@nextLink` automatically and returns every product in one `value` array:
 
 ```sh
 api-explorer call products.list
@@ -19,7 +19,7 @@ api-explorer call products.list --query '$version=2022-03-01-preview3'   # quote
 
 ## ProductsService
 
-`ProductsService` in `src/services/products-service.ts` orchestrates calls for products (offers).
+`ProductsService` in `src/services/products-service.ts` orchestrates calls for products.
 
 - `getAllProducts()` calls the `products.list` URL, follows every `@nextLink`, and returns the products as an array.
 - `getProduct(productId, { targetType })` calls the `product.get` URL and returns the product's resource tree: the product plus its plans, listings, pricing, and submissions. `productId` may include the `product/` prefix. `targetType` is `draft` (the default when omitted), `preview`, or `live`. `$version` defaults to `2022-03-01-preview5`.
@@ -33,11 +33,11 @@ const tree = await manager.getProduct(products[0].id, { targetType: "preview" })
 From the command line:
 
 ```sh
-api-explorer offers list
-api-explorer offers get product/27494b66-e9d3-4b2d-848b-5ce0543abd90 --target-type preview
-api-explorer offers getSchemas product/27494b66-e9d3-4b2d-848b-5ce0543abd90 --target-type preview   # one $schema per line
-api-explorer offers resourceIds product/27494b66-e9d3-4b2d-848b-5ce0543abd90   # one resource id per line
-api-explorer offers resourceIds product/27494b66-e9d3-4b2d-848b-5ce0543abd90 --schema Plan   # only plan ids
+api-explorer products list
+api-explorer products get product/27494b66-e9d3-4b2d-848b-5ce0543abd90 --target-type preview
+api-explorer products getSchemas product/27494b66-e9d3-4b2d-848b-5ce0543abd90 --target-type preview   # one $schema per line
+api-explorer products resourceIds product/27494b66-e9d3-4b2d-848b-5ce0543abd90   # one resource id per line
+api-explorer products resourceIds product/27494b66-e9d3-4b2d-848b-5ce0543abd90 --schema Plan   # only plan ids
 ```
 
 Microsoft's docs show `targetType="preview"` with quotes, but the API rejects quoted values, so the value is sent without them. `live` returns HTTP 400 for a product that has never been published.

@@ -9,13 +9,13 @@ import type { Endpoint, HttpMethod } from "./types.js";
  */
 export const endpoints: readonly Endpoint[] = [
   /**
-   * List all offers (products) defined by the publisher.
+   * List all products defined by the publisher.
    */
   endpoint({
     id: "products.list",
     group: "products",
     method: "GET",
-    summary: "List all offers (products) defined by the publisher.",
+    summary: "List all products defined by the publisher.",
     path: "/product",
     service: services.productIngestion,
     paged: true,
@@ -34,7 +34,7 @@ export const endpoints: readonly Endpoint[] = [
       },
       {
         name: "externalID",
-        description: "Return the product with this external ID (offer ID).",
+        description: "Return the product with this external ID.",
         required: false,
       },
       {

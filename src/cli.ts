@@ -23,8 +23,8 @@ export function createProgram(): Command {
         .default("en-US"),
     );
 
-    const offers = program.command("offers").description("Work with products (offers) through the ProductsService");
-    createOfferCommands(offers);
+  const productsCommand = program.command("products").description("Work with products through the ProductsService");
+  createProductCommands(productsCommand);
 
 
   program
@@ -135,10 +135,10 @@ Examples:
   api-explorer url <id> --param name=value --query name=value
   api-explorer call <id> --query name=value
   api-explorer call products.list
-  api-explorer offers list
-  api-explorer offers get <productId> --target-type preview
-  api-explorer offers getSchemas <productId> --target-type preview
-  api-explorer offers resourceIds <productId> --schema Plan
+  api-explorer products list
+  api-explorer products get <productId> --target-type preview
+  api-explorer products getSchemas <productId> --target-type preview
+  api-explorer products resourceIds <productId> --schema Plan
 
 Register APIs in src/urls/bases.ts and add operations in src/urls/catalog.ts.
 The URL builder checks each path template against its declared parameters.
@@ -167,9 +167,9 @@ interface CallOptions extends RequestOptions {
   timeout: string;
 }
 
-function createOfferCommands(offers: Command) {
+function createProductCommands(productsCommand: Command) {
 
-  offers
+  productsCommand
     .command("list")
     .description("Fetch every product the publisher has defined")
     .action(async (_options: unknown, command: Command) => {
@@ -190,7 +190,7 @@ function createOfferCommands(offers: Command) {
       }
     });
 
-  offers
+  productsCommand
     .command("get")
     .description("Fetch one product and all of its resources")
     .argument("<productId>", "product durable id, with or without the product/ prefix")
@@ -216,7 +216,7 @@ function createOfferCommands(offers: Command) {
       }
     });
 
-  offers
+  productsCommand
     .command("getSchemas")
     .description("List the $schema of the product and each of its resources, one per line")
     .argument("<productId>", "product durable id, with or without the product/ prefix")
@@ -243,7 +243,7 @@ function createOfferCommands(offers: Command) {
       }
     });
 
-  offers
+  productsCommand
     .command("resourceIds")
     .description("List the ids of the product and each of its resources, one per line")
     .argument("<productId>", "product durable id, with or without the product/ prefix")
