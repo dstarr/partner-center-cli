@@ -1,6 +1,6 @@
 import { Command, Option } from "commander";
-import { printEndpoint, printEndpointJson, printEndpointList } from "./services/endpoint-service.js";
-import { callEndpoint, reportFailure, resolveEndpointUrl } from "./services/request-service.js";
+import { EndpointService } from "./services/endpoint-service.js";
+import { RequestService } from "./services/request-service.js";
 import { ApiError } from "./http/pages.js";
 import { ProductParser, ProductSchemas } from "./services/products-parser.js";
 import { ProductsService, TARGET_TYPES, type TargetType } from "./services/products-service.js";
@@ -11,6 +11,8 @@ const METHODS: readonly HttpMethod[] = ["GET", "POST", "PATCH", "PUT", "DELETE"]
 
 export function createProgram(): Command {
   const program = new Command();
+  const endpointService = new EndpointService();
+  const requestService = new RequestService();
 
   program
     .name("api-explorer")
@@ -24,7 +26,7 @@ export function createProgram(): Command {
     );
 
   const productsCommand = program.command("products").description("Work with products through the ProductsService");
-  createProductCommands(productsCommand);
+  createProductCommands(productsCommand, requestService);
 
 
   program
@@ -39,10 +41,10 @@ export function createProgram(): Command {
         ...(options.method !== undefined ? { method: options.method } : {}),
       };
       if (options.json) {
-        printEndpointJson(filter);
+        endpointService.printEndpointJson(filter);
         return;
       }
-      printEndpointList(filter);
+      endpointService.printEndpointList(filter);
     });
 
   program
@@ -68,7 +70,7 @@ export function createProgram(): Command {
     .description("Show one endpoint's path, parameters, and docs")
     .argument("<id>", "endpoint id")
     .action((id: string) => {
-      printEndpoint(getEndpoint(id));
+      endpointService.printEndpoint(getEndpoint(id));
     });
 
   const requestOptions = (command: Command): Command =>
@@ -84,7 +86,7 @@ export function createProgram(): Command {
       .argument("<id>", "endpoint id"),
   ).action((id: string, options: RequestOptions, command: Command) => {
     const globals = globalsFrom(command);
-    const url = resolveEndpointUrl({
+    const url = requestService.resolveEndpointUrl({
       id,
       ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
       params: options.param,
@@ -110,7 +112,7 @@ export function createProgram(): Command {
     if (!Number.isFinite(timeoutSeconds) || timeoutSeconds <= 0) {
       throw new Error("--timeout must be a positive number of seconds.");
     }
-    await callEndpoint({
+    await requestService.callEndpoint({
       id,
       ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
       params: options.param,
@@ -168,7 +170,7 @@ interface CallOptions extends RequestOptions {
   timeout: string;
 }
 
-function createProductCommands(productsCommand: Command) {
+function createProductCommands(productsCommand: Command, requestService: RequestService) {
 
   productsCommand
     .command("list")
@@ -187,7 +189,7 @@ function createProductCommands(productsCommand: Command) {
         if (!(error instanceof ApiError)) {
           throw error;
         }
-        reportFailure(error.response);
+        requestService.reportFailure(error.response);
       }
     });
 
@@ -213,7 +215,7 @@ function createProductCommands(productsCommand: Command) {
         if (!(error instanceof ApiError)) {
           throw error;
         }
-        reportFailure(error.response);
+        requestService.reportFailure(error.response);
       }
     });
 
@@ -240,7 +242,7 @@ function createProductCommands(productsCommand: Command) {
         if (!(error instanceof ApiError)) {
           throw error;
         }
-        reportFailure(error.response);
+        requestService.reportFailure(error.response);
       }
     });
 
@@ -276,7 +278,7 @@ function createProductCommands(productsCommand: Command) {
           if (!(error instanceof ApiError)) {
             throw error;
           }
-          reportFailure(error.response);
+          requestService.reportFailure(error.response);
         }
       },
     );
@@ -313,7 +315,7 @@ function createProductCommands(productsCommand: Command) {
           if (!(error instanceof ApiError)) {
             throw error;
           }
-          reportFailure(error.response);
+          requestService.reportFailure(error.response);
         }
       },
     );
