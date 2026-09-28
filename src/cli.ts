@@ -1,6 +1,6 @@
 import { Command, Option } from "commander";
-import { printEndpoint, printEndpointJson, printEndpointList } from "./commands/endpoints.js";
-import { callEndpoint, reportFailure, resolveEndpointUrl } from "./commands/request.js";
+import { printEndpoint, printEndpointJson, printEndpointList } from "./services/endpoint-service.js";
+import { callEndpoint, reportFailure, resolveEndpointUrl } from "./services/request-service.js";
 import { ApiError } from "./http/pages.js";
 import { ProductParser, ProductSchemas } from "./services/products-parser.js";
 import { ProductsService, TARGET_TYPES, type TargetType } from "./services/products-service.js";
