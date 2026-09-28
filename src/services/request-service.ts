@@ -64,6 +64,7 @@ export class RequestService {
           locale: input.locale,
           timeoutMs: input.timeoutMs,
           onRequest: (next) => console.error(`GET ${next.toString()}`),
+          ...(endpoint.pageItemsKey !== undefined ? { itemsKey: endpoint.pageItemsKey } : {}),
         });
         console.error(`Pages: ${pages}, items: ${items.length}`);
         process.stdout.write(`${JSON.stringify({ value: items }, null, 2)}\n`);

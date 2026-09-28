@@ -85,6 +85,31 @@ export const endpoints: readonly Endpoint[] = [
     docsUrl:
       "https://learn.microsoft.com/en-us/partner-center/marketplace-offers/product-ingestion-api#method-1-resource-tree",
   }),
+
+  /**
+   * List all private offers, including multiparty private offers.
+   */
+  endpoint({
+    id: "privateOffers.list",
+    group: "privateOffers",
+    method: "GET",
+    summary: "List all private offers, including multiparty private offers, associated with the account.",
+    path: "/private-offer/query",
+    service: services.productIngestion,
+    paged: true,
+    pageItemsKey: "privateOffers",
+    pathParams: [],
+    queryParams: [
+      {
+        name: "$version",
+        description: "Schema version of the response.",
+        required: true,
+        default: "2023-07-15",
+      },
+    ],
+    docsUrl:
+      "https://learn.microsoft.com/en-us/partner-center/marketplace-offers/private-offers-api#retrieve-private-offers",
+  }),
 ];
 
 const byId = new Map(endpoints.map((item) => [item.id, item]));

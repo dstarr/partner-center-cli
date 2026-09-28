@@ -37,6 +37,8 @@ export interface Endpoint {
   queryParams: readonly QueryParam[];
   /** Responses are `{ value, @nextLink }` pages; `call` follows every page. */
   paged?: boolean;
+  /** Property holding each page's items when it is not `value`, such as `privateOffers`. */
+  pageItemsKey?: string;
   docsUrl?: string;
 }
 

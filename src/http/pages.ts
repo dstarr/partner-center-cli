@@ -11,7 +11,7 @@ export class ApiError extends Error {
 
 /**
  * GETs a collection and follows `@nextLink` until the last page.
- * Every page must be JSON with a `value` array.
+ * Every page must be JSON with an array in `itemsKey` (default `value`).
  */
 export async function fetchAllPages<T = unknown>(input: {
   url: URL;
@@ -20,7 +20,9 @@ export async function fetchAllPages<T = unknown>(input: {
   timeoutMs?: number;
   fetchImpl?: typeof fetch;
   onRequest?: (url: URL) => void;
+  itemsKey?: string;
 }): Promise<{ items: T[]; pages: number }> {
+  const itemsKey = input.itemsKey ?? "value";
   const items: T[] = [];
   let next: URL | undefined = input.url;
   let pages = 0;
@@ -43,28 +45,29 @@ export async function fetchAllPages<T = unknown>(input: {
       throw new ApiError(response);
     }
 
-    const page = parsePage(response.bodyText);
-    items.push(...(page.value as T[]));
+    const page = parsePage(response.bodyText, itemsKey);
+    items.push(...(page.items as T[]));
     next = page.nextLink ? sameOriginUrl(page.nextLink, input.url) : undefined;
   }
 
   return { items, pages };
 }
 
-function parsePage(text: string): { value: unknown[]; nextLink?: string } {
+function parsePage(text: string, itemsKey: string): { items: unknown[]; nextLink?: string } {
   let parsed: unknown;
   try {
     parsed = JSON.parse(text);
   } catch {
-    throw new Error("Expected a JSON response with a value array.");
+    throw new Error(`Expected a JSON response with a ${itemsKey} array.`);
   }
   const record = (parsed ?? {}) as Record<string, unknown>;
-  if (!Array.isArray(record["value"])) {
-    throw new Error("Expected a JSON response with a value array.");
+  const items = record[itemsKey];
+  if (!Array.isArray(items)) {
+    throw new Error(`Expected a JSON response with a ${itemsKey} array.`);
   }
   const link = record["@nextLink"] ?? record["@odata.nextLink"] ?? record["nextLink"];
   return {
-    value: record["value"],
+    items,
     ...(typeof link === "string" && link.length > 0 ? { nextLink: link } : {}),
   };
 }

@@ -171,6 +171,7 @@ Examples:
   api-explorer url <id> --param name=value --query name=value
   api-explorer call <id> --query name=value
   api-explorer call products.list
+  api-explorer private-offers list
   api-explorer products list
   api-explorer products get <productId> --target-type preview
   api-explorer products getSchemas <productId> --target-type preview

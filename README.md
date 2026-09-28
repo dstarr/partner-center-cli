@@ -8,6 +8,7 @@ Command line tool for exploring REST APIs. Requests are chosen from a catalog of
 | --- | --- | --- |
 | `products.list` | `GET {PRODUCT_INGESTION_BASE_URL}/product?$version={schema-version}` | Product Ingestion API |
 | `product.get` | `GET {PRODUCT_INGESTION_RESOURCE_TREE_BASE_URL}/product/{productId}?targetType={target}&$version={schema-version}` | Product Ingestion API |
+| `privateOffers.list` | `GET {PRODUCT_INGESTION_BASE_URL}/private-offer/query?$version={schema-version}` | Product Ingestion API |
 
 `products.list` returns all products defined by the publisher. `$version` defaults to `2022-03-01-preview3`. Results are paged. The endpoint is marked `paged: true` in the catalog, so `call` follows `@nextLink` automatically and returns every product in one `value` array:
 
@@ -40,6 +41,19 @@ api-explorer products getResourceIds product/27494b66-e9d3-4b2d-848b-5ce0543abd9
 api-explorer products getResourceIds product/27494b66-e9d3-4b2d-848b-5ce0543abd90 --schema Plan   # only plan ids
 api-explorer products getResources product/27494b66-e9d3-4b2d-848b-5ce0543abd90   # one JSON resource per line (JSON Lines)
 api-explorer products getResources product/27494b66-e9d3-4b2d-848b-5ce0543abd90 --schema Plan | jq .alias
+```
+
+## PrivateOffersService
+
+`PrivateOffersService` in `src/services/private-offers-service.ts` orchestrates calls for private offers.
+
+- `getAllPrivateOffers()` calls the `privateOffers.list` URL, follows every `@nextLink`, and returns every private offer, including multiparty private offers. `$version` defaults to `2023-07-15`.
+
+Private offer pages hold their items in a `privateOffers` array instead of `value`. The endpoint declares this with `pageItemsKey: "privateOffers"` in the catalog, so `call privateOffers.list` also follows every page.
+
+```sh
+api-explorer private-offers list
+api-explorer call privateOffers.list
 ```
 
 Microsoft's docs show `targetType="preview"` with quotes, but the API rejects quoted values, so the value is sent without them. `live` returns HTTP 400 for a product that has never been published.
