@@ -47,7 +47,7 @@ export class ProgramCommandBuilder {
 
     private addApiExplorerCommand(): void {
         this.program
-            .name("api-explorer")
+            .name("partner-center-cli")
             .description("Explore REST APIs from a catalog of endpoints")
             .version("0.1.0")
             .option("--base-url <url>", "https origin to use instead of the service base URL")
@@ -165,18 +165,18 @@ export class ProgramCommandBuilder {
             "after",
             `
 Examples:
-  api-explorer auth
-  api-explorer endpoints
-  api-explorer describe <id>
-  api-explorer url <id> --param name=value --query name=value
-  api-explorer call <id> --query name=value
-  api-explorer call products.list
-  api-explorer private-offers list
-  api-explorer products list
-  api-explorer products get <productId> --target-type preview
-  api-explorer products getSchemas <productId> --target-type preview
-  api-explorer products getResourceIds <productId> --schema Plan
-  api-explorer products getResources <productId> --schema Plan
+  partner-center-cli auth
+  partner-center-cli endpoints
+  partner-center-cli describe <id>
+  partner-center-cli url <id> --param name=value --query name=value
+  partner-center-cli call <id> --query name=value
+  partner-center-cli call products.list
+  partner-center-cli private-offers list
+  partner-center-cli products list
+  partner-center-cli products get <productId> --target-type preview
+  partner-center-cli products getSchemas <productId> --target-type preview
+  partner-center-cli products getResourceIds <productId> --schema Plan
+  partner-center-cli products getResources <productId> --schema Plan
 
 Register APIs in src/urls/bases.ts and add operations in src/urls/endpoints.ts.
 The URL builder checks each path template against its declared parameters.

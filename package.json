@@ -1,11 +1,11 @@
 {
-  "name": "api-explorer",
+  "name": "partner-center-cli",
   "version": "0.1.0",
   "private": true,
   "description": "Command line tool for exploring REST APIs",
   "type": "module",
   "bin": {
-    "api-explorer": "./dist/index.js"
+    "partner-center-cli": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc",

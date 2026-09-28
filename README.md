@@ -1,4 +1,4 @@
-# api-explorer
+# partner-center-cli
 
 Command line tool for exploring REST APIs. Requests are chosen from a catalog of endpoints, so URLs are built from one path template instead of being assembled at each call site.
 
@@ -13,9 +13,9 @@ Command line tool for exploring REST APIs. Requests are chosen from a catalog of
 `products.list` returns all products defined by the publisher. `$version` defaults to `2022-03-01-preview3`. Results are paged. The endpoint is marked `paged: true` in the catalog, so `call` follows `@nextLink` automatically and returns every product in one `value` array:
 
 ```sh
-api-explorer call products.list
-api-explorer call products.list --query type=softwareAsAService
-api-explorer call products.list --query '$version=2022-03-01-preview3'   # quote $ names in the shell
+partner-center-cli call products.list
+partner-center-cli call products.list --query type=softwareAsAService
+partner-center-cli call products.list --query '$version=2022-03-01-preview3'   # quote $ names in the shell
 ```
 
 ## ProductsService
@@ -34,13 +34,13 @@ const tree = await manager.getProduct(products[0].id, { targetType: "preview" })
 From the command line:
 
 ```sh
-api-explorer products list
-api-explorer products get product/27494b66-e9d3-4b2d-848b-5ce0543abd90 --target-type preview
-api-explorer products getSchemas product/27494b66-e9d3-4b2d-848b-5ce0543abd90 --target-type preview   # one $schema per line
-api-explorer products getResourceIds product/27494b66-e9d3-4b2d-848b-5ce0543abd90   # one resource id per line
-api-explorer products getResourceIds product/27494b66-e9d3-4b2d-848b-5ce0543abd90 --schema Plan   # only plan ids
-api-explorer products getResources product/27494b66-e9d3-4b2d-848b-5ce0543abd90   # one JSON resource per line (JSON Lines)
-api-explorer products getResources product/27494b66-e9d3-4b2d-848b-5ce0543abd90 --schema Plan | jq .alias
+partner-center-cli products list
+partner-center-cli products get product/27494b66-e9d3-4b2d-848b-5ce0543abd90 --target-type preview
+partner-center-cli products getSchemas product/27494b66-e9d3-4b2d-848b-5ce0543abd90 --target-type preview   # one $schema per line
+partner-center-cli products getResourceIds product/27494b66-e9d3-4b2d-848b-5ce0543abd90   # one resource id per line
+partner-center-cli products getResourceIds product/27494b66-e9d3-4b2d-848b-5ce0543abd90 --schema Plan   # only plan ids
+partner-center-cli products getResources product/27494b66-e9d3-4b2d-848b-5ce0543abd90   # one JSON resource per line (JSON Lines)
+partner-center-cli products getResources product/27494b66-e9d3-4b2d-848b-5ce0543abd90 --schema Plan | jq .alias
 ```
 
 Microsoft's docs show `targetType="preview"` with quotes, but the API rejects quoted values, so the value is sent without them. `live` returns HTTP 400 for a product that has never been published.
@@ -54,8 +54,8 @@ Microsoft's docs show `targetType="preview"` with quotes, but the API rejects qu
 Private offer pages hold their items in a `privateOffers` array instead of `value`. The endpoint declares this with `pageItemsKey: "privateOffers"` in the catalog, so `call privateOffers.list` also follows every page.
 
 ```sh
-api-explorer private-offers list
-api-explorer call privateOffers.list
+partner-center-cli private-offers list
+partner-center-cli call privateOffers.list
 ```
 
 The Product Ingestion API requests tokens for `https://graph.microsoft.com`. See the [Product Ingestion API docs](https://learn.microsoft.com/en-us/partner-center/marketplace-offers/product-ingestion-api).
@@ -102,18 +102,18 @@ npm run dev -- call <id> --query name=value
 `call` requests a token for the `resource` declared on the endpoint's service, or the default when the service doesn't declare one. To test sign-in on its own:
 
 ```sh
-api-explorer auth                                          # show the token expiry
-api-explorer auth --print-token                            # also write the token to stdout
-api-explorer auth --resource https://api.example.com       # request a token for another resource
+partner-center-cli auth                                          # show the token expiry
+partner-center-cli auth --print-token                            # also write the token to stdout
+partner-center-cli auth --resource https://api.example.com       # request a token for another resource
 ```
 
 ## Commands
 
 ```sh
-api-explorer endpoints [--group <group>] [--method GET] [--json]
-api-explorer describe <id>
-api-explorer url <id> --param name=value --query name=value [--allow-query]
-api-explorer call <id> --param name=value --query name=value [--allow-query] [--body <json> | --body-file <path>] [--dry-run] [--all] [--timeout <seconds>]
+partner-center-cli endpoints [--group <group>] [--method GET] [--json]
+partner-center-cli describe <id>
+partner-center-cli url <id> --param name=value --query name=value [--allow-query]
+partner-center-cli call <id> --param name=value --query name=value [--allow-query] [--body <json> | --body-file <path>] [--dry-run] [--all] [--timeout <seconds>]
 ```
 
 `url` only prints the resolved URL. `call` sends it. The response body is written to stdout; the request line, status, `MS-RequestId`, and `MS-CorrelationId` are written to stderr. For paged endpoints, and with `--all`, stderr instead gets one `GET` line per page and a `Pages: N, items: M` summary, and stdout gets every item merged into one `{ "value": [...] }` object. `--timeout` defaults to 60 seconds.
