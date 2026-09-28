@@ -16,12 +16,6 @@ export const services = {
     defaultBaseUrl: "https://graph.microsoft.com/rp/product-ingestion",
     resource: "https://graph.microsoft.com",
   },
-  productIngestionResourceTree: {
-    description: "Microsoft Marketplace Product Ingestion API (Microsoft Graph)",
-    baseUrlEnv: "PRODUCT_INGESTION_RESOURCE_TREE_BASE_URL",
-    defaultBaseUrl: "https://graph.microsoft.com/rp/product-ingestion/resource-tree",
-    resource: "https://graph.microsoft.com",
-  },
 } as const satisfies Record<string, ServiceDefinition>;
 
 export class UrlBuildError extends Error {

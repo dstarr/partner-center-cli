@@ -178,7 +178,7 @@ Examples:
   api-explorer products getResourceIds <productId> --schema Plan
   api-explorer products getResources <productId> --schema Plan
 
-Register APIs in src/urls/bases.ts and add operations in src/urls/catalog.ts.
+Register APIs in src/urls/bases.ts and add operations in src/urls/endpoints.ts.
 The URL builder checks each path template against its declared parameters.
 `,
         );

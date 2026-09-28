@@ -1,12 +1,12 @@
 import type { Endpoint, HttpMethod } from "../urls/types.js";
 import { baseUrlFor } from "../urls/bases.js";
-import { endpointGroups, listEndpoints } from "../urls/catalog.js";
+import { endpointGroups, listEndpoints } from "../urls/endpoints.js";
 
 /** Prints catalog endpoints for the `endpoints` and `describe` commands. */
 export class EndpointService {
   printEndpointList(filter: { group?: string; method?: HttpMethod }): void {
     if (listEndpoints().length === 0) {
-      console.error("The catalog is empty. Add endpoints in src/urls/catalog.ts.");
+      console.error("The catalog is empty. Add endpoints in src/urls/endpoints.ts.");
       return;
     }
     this.assertKnownGroup(filter.group);

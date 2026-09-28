@@ -33,7 +33,7 @@ describe("ProductsService.getProduct", () => {
     let seen = "";
     const manager = new ProductsService({
       auth: fakeAuth(),
-      baseUrl: `${BASE}/resource-tree`,
+      baseUrl: BASE,
       fetchImpl: async (url) => {
         seen = String(url);
         return json(tree);
@@ -54,7 +54,7 @@ describe("ProductsService.getProduct", () => {
     let seen = "";
     const manager = new ProductsService({
       auth: fakeAuth(),
-      baseUrl: `${BASE}/resource-tree`,
+      baseUrl: BASE,
       fetchImpl: async (url) => {
         seen = String(url);
         return json(tree);

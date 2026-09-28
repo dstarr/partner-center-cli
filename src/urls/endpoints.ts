@@ -61,8 +61,8 @@ export const endpoints: readonly Endpoint[] = [
     group: "product",
     method: "GET",
     summary: "Get a product and all of its resources (plans, listings, pricing, and so on) as a resource tree.",
-    path: "/product/{productId}",
-    service: services.productIngestionResourceTree,
+    path: "/resource-tree/product/{productId}",
+    service: services.productIngestion,
     pathParams: [
       {
         name: "productId",

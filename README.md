@@ -7,7 +7,7 @@ Command line tool for exploring REST APIs. Requests are chosen from a catalog of
 | Id | Request | Service |
 | --- | --- | --- |
 | `products.list` | `GET {PRODUCT_INGESTION_BASE_URL}/product?$version={schema-version}` | Product Ingestion API |
-| `product.get` | `GET {PRODUCT_INGESTION_RESOURCE_TREE_BASE_URL}/product/{productId}?targetType={target}&$version={schema-version}` | Product Ingestion API |
+| `product.get` | `GET {PRODUCT_INGESTION_BASE_URL}/resource-tree/product/{productId}?targetType={target}&$version={schema-version}` | Product Ingestion API |
 | `privateOffers.list` | `GET {PRODUCT_INGESTION_BASE_URL}/private-offer/query?$version={schema-version}` | Product Ingestion API |
 
 `products.list` returns all products defined by the publisher. `$version` defaults to `2022-03-01-preview3`. Results are paged. The endpoint is marked `paged: true` in the catalog, so `call` follows `@nextLink` automatically and returns every product in one `value` array:
@@ -43,6 +43,8 @@ api-explorer products getResources product/27494b66-e9d3-4b2d-848b-5ce0543abd90 
 api-explorer products getResources product/27494b66-e9d3-4b2d-848b-5ce0543abd90 --schema Plan | jq .alias
 ```
 
+Microsoft's docs show `targetType="preview"` with quotes, but the API rejects quoted values, so the value is sent without them. `live` returns HTTP 400 for a product that has never been published.
+
 ## PrivateOffersService
 
 `PrivateOffersService` in `src/services/private-offers-service.ts` orchestrates calls for private offers.
@@ -55,8 +57,6 @@ Private offer pages hold their items in a `privateOffers` array instead of `valu
 api-explorer private-offers list
 api-explorer call privateOffers.list
 ```
-
-Microsoft's docs show `targetType="preview"` with quotes, but the API rejects quoted values, so the value is sent without them. `live` returns HTTP 400 for a product that has never been published.
 
 The Product Ingestion API requests tokens for `https://graph.microsoft.com`. See the [Product Ingestion API docs](https://learn.microsoft.com/en-us/partner-center/marketplace-offers/product-ingestion-api).
 
@@ -112,13 +112,13 @@ api-explorer auth --resource https://api.example.com       # request a token for
 ```sh
 api-explorer endpoints [--group <group>] [--method GET] [--json]
 api-explorer describe <id>
-api-explorer url <id> --param name=value --query name=value
-api-explorer call <id> --param name=value --query name=value [--body <json> | --body-file <path>] [--dry-run] [--all]
+api-explorer url <id> --param name=value --query name=value [--allow-query]
+api-explorer call <id> --param name=value --query name=value [--allow-query] [--body <json> | --body-file <path>] [--dry-run] [--all] [--timeout <seconds>]
 ```
 
-`url` only prints the resolved URL. `call` sends it. The response body is written to stdout; the request line, status, `MS-RequestId`, and `MS-CorrelationId` are written to stderr.
+`url` only prints the resolved URL. `call` sends it. The response body is written to stdout; the request line, status, `MS-RequestId`, and `MS-CorrelationId` are written to stderr. For paged endpoints, and with `--all`, stderr instead gets one `GET` line per page and a `Pages: N, items: M` summary, and stdout gets every item merged into one `{ "value": [...] }` object. `--timeout` defaults to 60 seconds.
 
-`--allow-query` sends a query parameter that is not declared on the endpoint. `--base-url` replaces the service host for a single command.
+`--allow-query` sends a query parameter that is not declared on the endpoint. `--base-url` replaces the service base URL, including its path, for a single command.
 
 ## Add an API
 
@@ -135,7 +135,7 @@ api-explorer call <id> --param name=value --query name=value [--body <json> | --
    } as const satisfies Record<string, ServiceDefinition>;
    ```
 
-2. Add endpoints to `src/urls/catalog.ts`, wrapping each in `endpoint(...)`:
+2. Add endpoints to `src/urls/endpoints.ts`, wrapping each in `endpoint(...)`:
 
    ```ts
    export const endpoints: readonly Endpoint[] = [
@@ -152,4 +152,6 @@ api-explorer call <id> --param name=value --query name=value [--body <json> | --
    ];
    ```
 
-   Every `{placeholder}` needs a matching `pathParams` entry, query fields are declared on `queryParams`, and `service` must be registered. These are checked when the catalog loads.
+   The `id` must start with `{group}.`, every `{placeholder}` needs a matching `pathParams` entry, query fields are declared on `queryParams` instead of in the path, and the service's base URL must be a valid https URL. These are checked when the catalog loads.
+
+   For collection endpoints, set `paged: true` so `call` follows `@nextLink`. If the pages hold their items in a property other than `value`, name it with `pageItemsKey`.
