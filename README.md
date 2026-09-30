@@ -1,4 +1,4 @@
-# npm run dev
+# partner-center-cli
 
 Command line tool for exploring Microsoft Marketplace Partner Center REST APIs. 
 
