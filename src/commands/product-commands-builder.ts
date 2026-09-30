@@ -39,8 +39,8 @@ export class ProductCommandsBuilder {
             .description("List the $schema of the product and each of its resources, one per line")
             .argument("<productId>", "product durable id, with or without the product/ prefix")
             .addOption(new Option("--target-type <type>", "environment to read (default: draft)")
-            .choices([...TARGET_TYPES]))
-            .action(async (productId: string, options: { targetType?: TargetType; }) => { 
+                .choices([...TARGET_TYPES]))
+            .action(async (productId: string, options: { targetType?: TargetType; }) => {
                 const target = options.targetType !== undefined ? { targetType: options.targetType } : {};
                 const schemas = await this.productsService.getProductResourceSchemas(productId, target);
                 console.log(schemas.join("\n"));
@@ -51,7 +51,7 @@ export class ProductCommandsBuilder {
         productsCommand.command("getProduct").description("Fetch one product and all of its resources")
             .argument("<productId>", "product durable id, with or without the product/ prefix")
             .addOption(new Option("--target-type <type>", "environment to read (default: draft)")
-            .choices([...TARGET_TYPES]))
+                .choices([...TARGET_TYPES]))
             .action(async (productId: string, options: { targetType?: TargetType; }, command: Command) => {
                 const target = options.targetType !== undefined ? { targetType: options.targetType } : {};
                 const product = await this.productsService.getProduct(productId, target);
@@ -66,9 +66,9 @@ export class ProductCommandsBuilder {
             .argument("<productId>", "product durable id, with or without the product/ prefix")
             .addOption(
                 new Option("--target-type <type>", "environment to read (default: draft)")
-                .choices([...TARGET_TYPES])
+                    .choices([...TARGET_TYPES])
             )
-                .action(async (productId: string, options: { targetType?: TargetType; }) => {
+            .action(async (productId: string, options: { targetType?: TargetType; }) => {
                 const target = options.targetType !== undefined ? { targetType: options.targetType } : {};
                 const tree = await this.productsService.getProduct(productId, target);
                 console.error(`Target: ${tree.target?.targetType}, resources: ${tree.resources?.length ?? 0}`);
@@ -84,11 +84,11 @@ export class ProductCommandsBuilder {
             .argument("<productId>", "product durable id, with or without the product/ prefix")
             .addOption(
                 new Option("--target-type <type>", "environment to read (default: draft)")
-                .choices([...TARGET_TYPES])
+                    .choices([...TARGET_TYPES])
             )
             .addOption(
                 new Option("--schema <name>", "only resources that use this schema")
-                .choices(Object.keys(ProductSchemas))
+                    .choices(Object.keys(ProductSchemas))
             )
             .action(
                 async (
@@ -110,28 +110,28 @@ export class ProductCommandsBuilder {
             .command("getResourceIds")
             .description("List the ids of the product and each of its resources, one per line")
             .argument("<productId>", "product durable id, with or without the product/ prefix")
-                .addOption(new Option("--target-type <type>", "environment to read (default: draft)")
-                .choices([...TARGET_TYPES]))
-                .addOption(new Option("--schema <name>", "only resources that use this schema")
-                .choices(Object.keys(ProductSchemas)))
-                .action(async (productId: string, options: { targetType?: TargetType; schema?: keyof typeof ProductSchemas; }, command: Command) => {
-                
-                    const globals = globalsFrom(command);
-                    const manager = new ProductsService({
-                        ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
-                        locale: globals.locale,
-                    });
-                    const target = options.targetType !== undefined ? { targetType: options.targetType } : {};
-                    try {
-                        const product = await manager.getProduct(productId, target);
-                        const schema = options.schema !== undefined ? ProductSchemas[options.schema] : undefined;
-                        for (const id of new ProductParser().getResourceIds(product, schema)) {
-                            console.log(id);
-                        }
-                    } catch (error) {
-                        throw error;
+            .addOption(new Option("--target-type <type>", "environment to read (default: draft)")
+            .choices([...TARGET_TYPES]))
+            .addOption(new Option("--schema <name>", "only resources that use this schema")
+            .choices(Object.keys(ProductSchemas)))
+            .action(async (productId: string, options: { targetType?: TargetType; schema?: keyof typeof ProductSchemas; }, command: Command) => {
+
+                const globals = globalsFrom(command);
+                const manager = new ProductsService({
+                    ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
+                    locale: globals.locale,
+                });
+                const target = options.targetType !== undefined ? { targetType: options.targetType } : {};
+                try {
+                    const product = await manager.getProduct(productId, target);
+                    const schema = options.schema !== undefined ? ProductSchemas[options.schema] : undefined;
+                    for (const id of new ProductParser().getResourceIds(product, schema)) {
+                        console.log(id);
                     }
+                } catch (error) {
+                    throw error;
                 }
+            }
             );
     }
 
