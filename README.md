@@ -69,17 +69,6 @@ npm run dev help
 | `product.get` | `GET {PRODUCT_INGESTION_BASE_URL}/resource-tree/product/{productId}?targetType={target}&$version={schema-version}` | Product Ingestion API |
 | `privateOffers.list` | `GET {PRODUCT_INGESTION_BASE_URL}/private-offer/query?$version={schema-version}` | Product Ingestion API |
 
-`products.list` returns all products defined by the publisher. `$version` defaults to `2022-03-01-preview3`. Results are paged. The endpoint is marked `paged: true` in the catalog, so `call` follows `@nextLink` automatically and returns every product in one `value` array:
-
-```sh
-npm run dev call privateOffers.list
-npm run dev call products.list
-npm run dev call products.list --query type=softwareAsAService
-npm run dev call products.list --query '$version=2022-03-01-preview3'   # quote $ names in the shell
-```
-
-Microsoft's docs show `targetType="preview"` with quotes, but the API rejects quoted values, so the value is sent without them. `live` returns HTTP 400 for a product that has never been published.
-
 ## PrivateOffersService
 
 `PrivateOffersService` in `src/services/private-offers-service.ts` orchestrates calls for private offers.
