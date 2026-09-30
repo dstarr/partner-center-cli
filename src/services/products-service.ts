@@ -2,6 +2,7 @@ import { AuthManager } from "../auth/manager.js";
 import { sendApiRequest } from "../http/client.js";
 import { ApiError, fetchAllPages } from "../http/pages.js";
 import { buildUrl, getEndpoint, type BuildUrlInput } from "../urls/index.js";
+import type { ProductConfiguration } from "./product-configuration-factory.js";
 
 /** A product resource from the Product Ingestion API. */
 export interface Product {
@@ -115,6 +116,31 @@ export class ProductsService {
       throw new ApiError(response);
     }
     return JSON.parse(response.bodyText) as ProductResourceTree;
+  }
+
+  /**
+   * Post a product configuration using the ingestion API.
+   */
+  async postProductConfiguration(configuration: ProductConfiguration): Promise<string> {
+    const url = this.url({
+      endpoint: getEndpoint("product.post"),
+    });
+
+    const body = JSON.stringify(configuration);
+
+    console.log(body);
+
+    const response = await sendApiRequest({
+      url,
+      method: "POST",
+      accessToken: await this.auth.getAccessToken(),
+      body,
+      ...this.requestOptions(),
+    });
+    if (!response.ok) {
+      throw new ApiError(response);
+    }
+    return response.bodyText;
   }
 
   private url(input: Omit<BuildUrlInput, "baseUrl">): URL {

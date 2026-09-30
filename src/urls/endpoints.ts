@@ -87,6 +87,27 @@ export const endpoints: readonly Endpoint[] = [
   }),
 
   /**
+   * post changes to a product using the ingestion API
+   */
+  endpoint({
+    id: "product.post",
+    group: "product",
+    method: "POST",
+    summary: "Post a product configuration using the ingestion API.",
+    path: "/configure",
+    service: services.productIngestion,
+    pathParams: [],
+    queryParams: [
+      {
+        name: "$version",
+        description: "Schema version of the response.",
+        required: true,
+        default: "2022-03-01-preview2",
+      },
+    ],
+  }),
+
+  /**
    * List all private offers, including multiparty private offers.
    */
   endpoint({

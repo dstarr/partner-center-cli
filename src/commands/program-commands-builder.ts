@@ -166,17 +166,17 @@ export class ProgramCommandBuilder {
             `
 Examples:
   partner-center-cli auth
-  partner-center-cli endpoints
-  partner-center-cli describe <id>
-  partner-center-cli url <id> --param name=value --query name=value
   partner-center-cli call <id> --query name=value
-  partner-center-cli call products.list
+  partner-center-cli describe <id>
+  partner-center-cli endpoints
   partner-center-cli private-offers list
-  partner-center-cli products list
   partner-center-cli products get <productId> --target-type preview
-  partner-center-cli products getSchemas <productId> --target-type preview
   partner-center-cli products getResourceIds <productId> --schema Plan
   partner-center-cli products getResources <productId> --schema Plan
+  partner-center-cli products getSchemas <productId> --target-type preview
+  partner-center-cli products list
+  partner-center-cli products rename <productId> <alias>
+  partner-center-cli url <id> --param name=value --query name=value
 
 Register APIs in src/urls/bases.ts and add operations in src/urls/endpoints.ts.
 The URL builder checks each path template against its declared parameters.

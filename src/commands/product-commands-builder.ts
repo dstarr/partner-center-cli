@@ -1,7 +1,8 @@
 import { Option, type Command } from "commander";
-import { TARGET_TYPES, ProductsService, type TargetType } from "../services/products-service.js";
+import { TARGET_TYPES, ProductsService, type TargetType, type Product } from "../services/products-service.js";
 import { globalsFrom } from "./options.js";
 import { ProductParser, ProductSchemas } from "../services/products-parser.js";
+import { ProductConfigurationFactory } from "../services/product-configuration-factory.js";
 
 export class ProductCommandsBuilder {
     private readonly productsService: ProductsService;
@@ -22,6 +23,7 @@ export class ProductCommandsBuilder {
         this.addGetProductResourceIdsCommand(productsCommand);
         this.addGetProductResourcesCommand(productsCommand);
         this.addListProductCommand(productsCommand);
+        this.addRenameProductCommand(productsCommand);
     }
     private addListProductsCommand(productsCommand: Command): void {
         productsCommand.command("list")
@@ -132,5 +134,43 @@ export class ProductCommandsBuilder {
                     }
                 }
             );
+    }
+
+    private addRenameProductCommand(productsCommand: Command): void {
+        productsCommand.command("rename")
+            .description("Post a new alias for a product")
+            .argument("<productId>", "product durable id, without the product/ prefix")
+            .argument("<alias>", "new alias for the product")
+            .action(async (productId: string, alias: string) => {
+
+                const product = await this.productsService.getProduct(productId);
+
+                // get the product resource by schema
+                const productResource = product.resources.find((resource) => resource.$schema === ProductSchemas.Product);
+
+                // check if the product resource exists
+                if (!productResource) {
+                    console.error(`Product resource with schema ${ProductSchemas.Product} not found`);
+                    return;
+                }
+
+                // check if the product already has the alias
+                if (productResource.alias === alias) {
+                    console.error(`Product already has alias ${alias}`);
+                    return;
+                }
+
+                // update the product resource alias
+                productResource.alias = alias;
+
+                // post the new product resource configuration
+                const result = await this.productsService.postProductConfiguration({
+                    $schema: ProductSchemas.Configure,
+                    resources: [
+                        productResource
+                    ],
+                });
+                console.log(result);
+            });
     }
 }
