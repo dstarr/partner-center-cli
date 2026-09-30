@@ -45,7 +45,7 @@ npm install
 npm run dev help 
 ```
 
-`npm run dev help` gives you all command line options in the CLI.
+`npm run dev help` gives you all command line options in the CLI. Use help to explore all the commands.
 
 # Sample usage
 
@@ -61,44 +61,6 @@ npm run dev help
 
   `npm run dev -- products getResources c322a73a-5320-4ce8-b3b6-c5236225fdad --target-type draft`
 
-## Supported endpoints
-
-| Id | Request | Service |
-| --- | --- | --- |
-| `products.list` | `GET {PRODUCT_INGESTION_BASE_URL}/product?$version={schema-version}` | Product Ingestion API |
-| `product.get` | `GET {PRODUCT_INGESTION_BASE_URL}/resource-tree/product/{productId}?targetType={target}&$version={schema-version}` | Product Ingestion API |
-| `privateOffers.list` | `GET {PRODUCT_INGESTION_BASE_URL}/private-offer/query?$version={schema-version}` | Product Ingestion API |
-
-## PrivateOffersService
-
-`PrivateOffersService` in `src/services/private-offers-service.ts` orchestrates calls for private offers.
-
-- `getAllPrivateOffers()` calls the `privateOffers.list` URL, follows every `@nextLink`, and returns every private offer, including multiparty private offers. `$version` defaults to `2023-07-15`.
-
-Private offer pages hold their items in a `privateOffers` array instead of `value`. The endpoint declares this with `pageItemsKey: "privateOffers"` in the catalog, so `call privateOffers.list` also follows every page.
-
-```sh
-npm run dev private-offers list
-npm run dev call privateOffers.list
-```
-
-The Product Ingestion API requests tokens for `https://graph.microsoft.com`. See the [Product Ingestion API docs](https://learn.microsoft.com/en-us/partner-center/marketplace-offers/product-ingestion-api).
-
-
-
-## Authentication
-
-`AuthManager` in `src/auth/manager.ts` signs in with the client credentials grant. It posts `resource`, `client_id`, `client_secret`, and `grant_type=client_credentials` to `https://login.microsoftonline.com/{tenantId}/oauth2/token`, then caches the token until five minutes before it expires.
-
-| URL | Used for |
-| --- | --- |
-| `https://login.microsoftonline.com` | Login base URL (`DEFAULT_LOGIN_BASE_URL`) |
-| `https://api.partnercenter.microsoft.com` | Default `resource` (`DEFAULT_RESOURCE`) |
-
-`call` requests a token for the `resource` declared on the endpoint's service, or the default when the service doesn't declare one. To test sign-in on its own:
-
-```sh
-npm run dev auth                                          # show the token expiry
-npm run dev auth --print-token                            # also write the token to stdout
-npm run dev auth --resource https://api.example.com       # request a token for another resource
-```
+- Change the alias of a product (offer) in Partner Center:
+  
+  `npm run dev products rename c322a73a-5320-4ce8-b3b6-c5236225fdae 'New Offer Name'`

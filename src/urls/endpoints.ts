@@ -90,7 +90,7 @@ export const endpoints: readonly Endpoint[] = [
    * post changes to a product using the ingestion API
    */
   endpoint({
-    id: "product.post",
+    id: "product.configure",
     group: "product",
     method: "POST",
     summary: "Post a product configuration using the ingestion API.",

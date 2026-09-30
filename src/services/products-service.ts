@@ -123,7 +123,7 @@ export class ProductsService {
    */
   async postProductConfiguration(configuration: ProductConfiguration): Promise<string> {
     const url = this.url({
-      endpoint: getEndpoint("product.post"),
+      endpoint: getEndpoint("product.configure"),
     });
 
     const body = JSON.stringify(configuration);

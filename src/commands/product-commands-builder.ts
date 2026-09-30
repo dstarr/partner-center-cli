@@ -55,7 +55,6 @@ export class ProductCommandsBuilder {
             .action(async (productId: string, options: { targetType?: TargetType; }, command: Command) => {
                 const target = options.targetType !== undefined ? { targetType: options.targetType } : {};
                 const product = await this.productsService.getProduct(productId, target);
-                console.error(`Product: ${product.name}`);
                 console.log(JSON.stringify(product, null, 2));
             });
     }
