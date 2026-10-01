@@ -4,16 +4,25 @@ Command line tool for exploring Microsoft Marketplace Partner Center REST APIs.
 
 This tool is for developers who want to better understand the Partner Center APIs. There are several APIs that expose the full capabilities of Partner Center. This sample uses the Partner Center Ingestion API.
 
-It is implemented in TypeScript and there isn't much reason to run it with any command other than `npm run dev` as it's just a simple reference applicaiton.
-
-Nothing in this tool updates or deletes data in Partner Center. All implmented operations are reads.
+It is implemented in TypeScript and there isn't much reason to run it with any command other than `npm run dev` as it's just a simple reference application.
 
 ## Setting up Partner Center to run this script
 
 Before running this script, you must add a Microsoft Entra ID applicaiton in Partner Center.
-Reference the [offical Microsoft documentationon](https://learn.microsoft.com/en-us/partner-center/marketplace-offers/product-ingestion-api) how to do this.
+Reference the [offical Microsoft documentation on](https://learn.microsoft.com/en-us/partner-center/marketplace-offers/product-ingestion-api) how to do this.
 
 Collect the information needed for the ENV VARs as you go. Especially ensure you keep a copy of the key (secret).
+
+## Script setup and run
+
+Requires Node.js 20 or newer.
+
+```sh
+npm install
+npm run dev help 
+```
+
+`npm run dev help` gives you all command line options in the CLI. Use help to explore all the commands.
 
 ## Envrionmental variables
 
@@ -29,23 +38,12 @@ Settings may be read from a `.env` file in the project root directory. Copy `.en
 
 A flag overrides the environment. A variable already set in your shell overrides `.env`. Blank entries count as unset.
 
-During development you can skip the build. Put `--` after `dev` so npm passes flags such as `--query` through to the CLI instead of reading them itself:
+Put `--` after `dev` so npm passes flags such as `--query` through to the CLI instead of reading them itself:
 
 ```sh
 npm run dev -- endpoints
 npm run dev -- call <id> --query name=value
 ```
-
-## Script setup and run
-
-Requires Node.js 20 or newer.
-
-```sh
-npm install
-npm run dev help 
-```
-
-`npm run dev help` gives you all command line options in the CLI. Use help to explore all the commands.
 
 # Sample usage
 
