@@ -1,5 +1,6 @@
 import { AuthManager } from "../auth/manager.js";
-import { fetchAllPages } from "../http/pages.js";
+import { sendApiRequest } from "../http/client.js";
+import { ApiError, fetchAllPages } from "../http/pages.js";
 import { buildUrl, getEndpoint } from "../urls/index.js";
 
 /** A private offer summary from the Product Ingestion API. */
@@ -62,5 +63,30 @@ export class PrivateOffersService {
       ...(this.options.fetchImpl !== undefined ? { fetchImpl: this.options.fetchImpl } : {}),
     });
     return items;
+  }
+
+  /** Fetches one private offer. Accepts the id with or without the `private-offer/` prefix. */
+  async getPrivateOffer(id: string): Promise<PrivateOffer> {
+    const privateOfferId = id.trim().replace(/^private-offer\//, "");
+    if (privateOfferId.length === 0) {
+      throw new Error("Private offer id is required.");
+    }
+    const { url } = buildUrl({
+      endpoint: getEndpoint("privateOffers.get"),
+      ...(this.options.baseUrl !== undefined ? { baseUrl: this.options.baseUrl } : {}),
+      pathParams: { id: privateOfferId },
+    });
+    const response = await sendApiRequest({
+      url,
+      method: "GET",
+      accessToken: await this.auth.getAccessToken(),
+      ...(this.options.locale !== undefined ? { locale: this.options.locale } : {}),
+      ...(this.options.timeoutMs !== undefined ? { timeoutMs: this.options.timeoutMs } : {}),
+      ...(this.options.fetchImpl !== undefined ? { fetchImpl: this.options.fetchImpl } : {}),
+    });
+    if (!response.ok) {
+      throw new ApiError(response);
+    }
+    return JSON.parse(response.bodyText) as PrivateOffer;
   }
 }

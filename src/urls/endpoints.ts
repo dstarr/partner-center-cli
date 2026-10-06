@@ -131,6 +131,34 @@ export const endpoints: readonly Endpoint[] = [
     docsUrl:
       "https://learn.microsoft.com/en-us/partner-center/marketplace-offers/private-offers-api#retrieve-private-offers",
   }),
+
+  /**
+   * Get one private offer by its id.
+   */
+  endpoint({
+    id: "privateOffers.get",
+    group: "privateOffers",
+    method: "GET",
+    summary: "Get one private offer by its id.",
+    path: "/private-offer/{id}",
+    service: services.productIngestion,
+    pathParams: [
+      {
+        name: "id",
+        description: "Private offer id, for example 77915369-728d-4cf2-ae81-f2a05ee907b7.",
+      },
+    ],
+    queryParams: [
+      {
+        name: "$version",
+        description: "Schema version of the response.",
+        required: true,
+        default: "2023-07-15",
+      },
+    ],
+    docsUrl:
+      "https://learn.microsoft.com/en-us/partner-center/marketplace-offers/private-offers-api#retrieve-a-private-offer",
+  }),
 ];
 
 const byId = new Map(endpoints.map((item) => [item.id, item]));

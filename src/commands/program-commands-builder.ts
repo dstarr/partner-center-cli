@@ -170,6 +170,7 @@ Examples:
   partner-center-cli describe <id>
   partner-center-cli endpoints
   partner-center-cli private-offers list
+  partner-center-cli private-offers get <id>
   partner-center-cli products get <productId> --target-type preview
   partner-center-cli products getResourceIds <productId> --schema Plan
   partner-center-cli products getResources <productId> --schema Plan
