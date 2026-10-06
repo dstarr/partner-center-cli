@@ -169,7 +169,15 @@ export class ProductCommandsBuilder {
                         productResource
                     ],
                 });
-                console.log(result);
+                
+                // poll for the job to complete
+                let job = JSON.parse(result);
+                console.log(JSON.stringify(job, null, 2));
+                // while (job.jobStatus !== "completed") {
+                //     await new Promise(resolve => setTimeout(resolve, 1000));
+                //     job = await this.productsService.getConfigureJobStatus(job.jobId);
+                //     console.log(JSON.stringify(job, null, 2));
+                // }
             });
     }
 }

@@ -108,6 +108,54 @@ export const endpoints: readonly Endpoint[] = [
   }),
 
   /**
+   * Post a private offer configuration using the ingestion API.
+   */
+  endpoint({
+    id: "privateOffers.configure",
+    group: "privateOffers",
+    method: "POST",
+    summary: "Post a private offer configuration using the ingestion API.",
+    path: "/configure",
+    service: services.productIngestion,
+    pathParams: [],
+    queryParams: [
+      {
+        name: "$version",
+        description: "Schema version of the response.",
+        required: true,
+        default: "2022-07-01",
+      },
+    ],
+  }),
+
+  /**
+   * Get the status of a configure job started by any /configure POST.
+   */
+  endpoint({
+    id: "configure.status",
+    group: "configure",
+    method: "GET",
+    summary: "Get the status of a configure job.",
+    path: "/configure/{jobId}/status",
+    service: services.productIngestion,
+    pathParams: [
+      {
+        name: "jobId",
+        description: "Job id returned by a /configure POST, for example a312db6b-83d5-42e2-a6a8-0c09d901f6ae.",
+      },
+    ],
+    queryParams: [
+      {
+        name: "$version",
+        description: "Schema version of the response.",
+        required: true,
+        default: "2022-07-01",
+      },
+    ],
+    docsUrl: "https://learn.microsoft.com/en-us/partner-center/marketplace-offers/product-ingestion-api",
+  }),
+
+  /**
    * List all private offers, including multiparty private offers.
    */
   endpoint({

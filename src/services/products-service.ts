@@ -128,8 +128,6 @@ export class ProductsService {
 
     const body = JSON.stringify(configuration);
 
-    console.log(body);
-
     const response = await sendApiRequest({
       url,
       method: "POST",
