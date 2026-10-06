@@ -2,6 +2,7 @@ import { AuthManager } from "../auth/manager.js";
 import { sendApiRequest } from "../http/client.js";
 import { ApiError, fetchAllPages } from "../http/pages.js";
 import { buildUrl, getEndpoint } from "../urls/index.js";
+import type { ConfigureJob } from "./job-service.js";
 
 /** `$schema` URLs used by private offer resources. */
 export enum PrivateOfferSchemas {
@@ -13,19 +14,6 @@ export enum PrivateOfferSchemas {
 export interface PrivateOfferConfiguration {
   $schema: string;
   resources: PrivateOffer[];
-}
-
-/** The asynchronous job returned by `/configure`. */
-export interface ConfigureJob {
-  $schema: string;
-  jobId: string;
-  /** Such as `notStarted`, `running`, or `completed`. */
-  jobStatus: string;
-  /** Such as `pending`, `succeeded`, or `failed`. */
-  jobResult: string;
-  jobStart?: string;
-  jobEnd?: string;
-  errors: { resourceId?: string; code: string; message: string }[];
 }
 
 /** A private offer summary from the Product Ingestion API. */
@@ -58,7 +46,7 @@ export interface PrivateOffersServiceOptions {
 
 /** Orchestrates calls for private offers defined in Partner Center. */
 export class PrivateOffersService {
-  
+
   private readonly auth: AuthManager;
   private readonly options: Omit<PrivateOffersServiceOptions, "auth">;
 
@@ -117,14 +105,14 @@ export class PrivateOffersService {
   }
 
   async postPrivateOfferConfiguration(configuration: PrivateOfferConfiguration): Promise<ConfigureJob> {
-    
+
     const { url } = buildUrl({
       endpoint: getEndpoint("privateOffers.configure"),
       ...(this.options.baseUrl !== undefined ? { baseUrl: this.options.baseUrl } : {}),
     });
 
     const body = JSON.stringify(configuration);
-    
+
     console.log(configuration, null, 2);
 
     const response = await sendApiRequest({
@@ -141,26 +129,5 @@ export class PrivateOffersService {
     }
     return JSON.parse(response.bodyText) as ConfigureJob;
   }
-
-  /** Fetches the current status of a job returned by `postPrivateOfferConfiguration`. */
-  async getConfigureJobStatus(jobId: string): Promise<ConfigureJob> {
-    const { url } = buildUrl({
-      endpoint: getEndpoint("configure.status"),
-      ...(this.options.baseUrl !== undefined ? { baseUrl: this.options.baseUrl } : {}),
-      pathParams: { jobId },
-    });
-    const response = await sendApiRequest({
-      url,
-      method: "GET",
-      accessToken: await this.auth.getAccessToken(),
-      ...(this.options.locale !== undefined ? { locale: this.options.locale } : {}),
-      ...(this.options.timeoutMs !== undefined ? { timeoutMs: this.options.timeoutMs } : {}),
-      ...(this.options.fetchImpl !== undefined ? { fetchImpl: this.options.fetchImpl } : {}),
-    });
-    if (!response.ok) {
-      throw new ApiError(response);
-    }
-    return JSON.parse(response.bodyText) as ConfigureJob;
-}
 
 }

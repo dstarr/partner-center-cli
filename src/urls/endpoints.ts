@@ -132,8 +132,8 @@ export const endpoints: readonly Endpoint[] = [
    * Get the status of a configure job started by any /configure POST.
    */
   endpoint({
-    id: "configure.status",
-    group: "configure",
+    id: "jobs.get",
+    group: "jobs",
     method: "GET",
     summary: "Get the status of a configure job.",
     path: "/configure/{jobId}/status",

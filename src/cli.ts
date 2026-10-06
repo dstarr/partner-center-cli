@@ -4,6 +4,7 @@ import { RequestService } from "./services/request-service.js";
 import { ProgramCommandBuilder } from "./commands/program-commands-builder.js";
 import { ProductCommandsBuilder } from "./commands/product-commands-builder.js";
 import { PrivateOfferCommandsBuilder } from "./commands/private-offer-commands-builder.js";
+import { JobCommandsBuilder } from "./commands/job-commands-builder.js";
 
 export function createProgram(): Command {
   const endpointService = new EndpointService();
@@ -13,6 +14,7 @@ export function createProgram(): Command {
 
   new ProductCommandsBuilder().addProductCommands(program);
   new PrivateOfferCommandsBuilder().addPrivateOfferCommands(program);
+  new JobCommandsBuilder().addJobCommands(program);
 
   return program;
 }

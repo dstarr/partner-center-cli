@@ -2,6 +2,7 @@ import type { Command } from "commander";
 import { PrivateOffersService, type PrivateOffer } from "../services/private-offers-service.js";
 import { globalsFrom, type GlobalOptions } from "./options.js";
 import { PrivateOfferSchemas } from "../services/private-offers-service.js";
+import { JobService } from "../services/job-service.js";
 
 export class PrivateOfferCommandsBuilder {
     
@@ -72,12 +73,17 @@ export class PrivateOfferCommandsBuilder {
                 console.log(JSON.stringify(result, null, 2));
 
                 // poll for the job to complete
+                const jobService = new JobService({
+                    ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
+                    locale: globals.locale,
+                });
                 let job = result;
                 while (job.jobStatus !== "completed") {
                     await new Promise(resolve => setTimeout(resolve, 1000));
-                    job = await privateOffersService.getConfigureJobStatus(job.jobId);
+                    job = await jobService.getJobStatus(job.jobId);
                     console.log(JSON.stringify(job, null, 2));
                 }
+                console.error(`Job completed: ${job.jobStatus}`);
             });
     }
 }

@@ -2,15 +2,17 @@ import { Option, type Command } from "commander";
 import { TARGET_TYPES, ProductsService, type TargetType, type Product } from "../services/products-service.js";
 import { globalsFrom } from "./options.js";
 import { ProductParser, ProductSchemas } from "../services/products-parser.js";
-import { ProductConfigurationFactory } from "../services/product-configuration-factory.js";
+import { JobService, type ConfigureJob } from "../services/job-service.js";
 
 export class ProductCommandsBuilder {
     private readonly productsService: ProductsService;
     private readonly productParser: ProductParser;
-
+    private readonly jobService: JobService;
+    
     constructor() {
         this.productsService = new ProductsService();
         this.productParser = new ProductParser();
+        this.jobService = new JobService();
     }
 
     public addProductCommands(program: Command): void {
@@ -171,13 +173,14 @@ export class ProductCommandsBuilder {
                 });
                 
                 // poll for the job to complete
-                let job = JSON.parse(result);
+                let job = JSON.parse(result) as ConfigureJob;
                 console.log(JSON.stringify(job, null, 2));
-                // while (job.jobStatus !== "completed") {
-                //     await new Promise(resolve => setTimeout(resolve, 1000));
-                //     job = await this.productsService.getConfigureJobStatus(job.jobId);
-                //     console.log(JSON.stringify(job, null, 2));
-                // }
+                while (job.jobStatus !== "completed") {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    job = await this.jobService.getJobStatus(job.jobId);
+                    console.log(JSON.stringify(job, null, 2));
+                }
+                console.error(`Job completed: ${job.jobStatus}`);
             });
     }
 }
