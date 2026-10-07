@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { AuthError, AuthManager, DEFAULT_RESOURCE } from "../src/auth/manager.js";
+import { AuthError, AuthManager, DEFAULT_RESOURCE } from "../src/auth/auth-manager.js";
 
 const credentials = {
   tenantId: "contoso.onmicrosoft.com",

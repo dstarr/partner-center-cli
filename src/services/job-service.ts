@@ -1,4 +1,4 @@
-import { AuthManager } from "../auth/manager.js";
+import { AuthManager } from "../auth/auth-manager.js";
 import { sendApiRequest } from "../http/client.js";
 import { ApiError } from "../http/pages.js";
 import { buildUrl, getEndpoint } from "../urls/index.js";

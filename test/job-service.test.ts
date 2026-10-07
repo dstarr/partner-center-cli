@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { AuthManager } from "../src/auth/manager.js";
+import { AuthManager } from "../src/auth/auth-manager.js";
 import { ApiError } from "../src/http/pages.js";
 import { JobService } from "../src/services/job-service.js";
 

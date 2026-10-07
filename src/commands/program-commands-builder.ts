@@ -1,5 +1,5 @@
 import { Command, Option } from "commander";
-import { AuthManager, DEFAULT_RESOURCE } from "../auth/manager.js";
+import { AuthManager, DEFAULT_RESOURCE } from "../auth/auth-manager.js";
 import type { EndpointService } from "../services/endpoint-service.js";
 import type { RequestService } from "../services/request-service.js";
 import { getEndpoint, type HttpMethod } from "../urls/index.js";

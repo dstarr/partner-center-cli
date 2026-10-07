@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { AuthManager } from "../auth/manager.js";
+import { AuthManager } from "../auth/auth-manager.js";
 import { buildUrl, getEndpoint } from "../urls/index.js";
 import { sendApiRequest, type ApiResponse } from "../http/client.js";
 import { ApiError, fetchAllPages } from "../http/pages.js";
