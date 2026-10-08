@@ -81,15 +81,19 @@ export class PrivateOffersService {
 
   /** Fetches one private offer. Accepts the id with or without the `private-offer/` prefix. */
   async getPrivateOffer(id: string): Promise<PrivateOffer> {
+    
     const privateOfferId = id.trim().replace(/^private-offer\//, "");
+    
     if (privateOfferId.length === 0) {
       throw new Error("Private offer id is required.");
     }
+    
     const { url } = buildUrl({
       endpoint: getEndpoint("privateOffers.get"),
       ...(this.options.baseUrl !== undefined ? { baseUrl: this.options.baseUrl } : {}),
       pathParams: { id: privateOfferId },
     });
+
     const response = await sendApiRequest({
       url,
       method: "GET",
@@ -98,13 +102,21 @@ export class PrivateOffersService {
       ...(this.options.timeoutMs !== undefined ? { timeoutMs: this.options.timeoutMs } : {}),
       ...(this.options.fetchImpl !== undefined ? { fetchImpl: this.options.fetchImpl } : {}),
     });
+
+    if(response.status === 404) {
+      throw new Error("Private offer not found");
+    }
+
     if (!response.ok) {
       throw new ApiError(response);
     }
+    
     return JSON.parse(response.bodyText) as PrivateOffer;
   }
 
   async postPrivateOfferConfiguration(configuration: PrivateOfferConfiguration): Promise<ConfigureJob> {
+    
+    console.log(configuration, null, 2);
 
     const { url } = buildUrl({
       endpoint: getEndpoint("privateOffers.configure"),
@@ -112,8 +124,6 @@ export class PrivateOffersService {
     });
 
     const body = JSON.stringify(configuration);
-
-    console.log(configuration, null, 2);
 
     const response = await sendApiRequest({
       url,

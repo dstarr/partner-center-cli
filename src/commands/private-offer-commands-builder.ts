@@ -13,7 +13,7 @@ export class PrivateOfferCommandsBuilder {
 
         this.addListPrivateOffersCommand(privateOffersCommand);
         this.addGetPrivateOfferCommand(privateOffersCommand);
-        this.addRenamePrivateOfferCommand(privateOffersCommand);
+        this.addDeletePrivateOfferCommand(privateOffersCommand);
     }
 
     private addListPrivateOffersCommand(privateOffersCommand: Command): void {
@@ -41,18 +41,17 @@ export class PrivateOfferCommandsBuilder {
                     ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
                     locale: globals.locale,
                 });
-                const privateOffer = await privateOffersService.getPrivateOffer(id);
+                const privateOffer = await privateOffersService.getPrivateOffer(id) as PrivateOffer;
                 console.error(`Private offer: ${privateOffer.id}`);
                 console.log(JSON.stringify(privateOffer, null, 2));
             });
     }
 
-    private addRenamePrivateOfferCommand(privateOffersCommand: Command): void {
-        privateOffersCommand.command("rename")
-            .description("Rename a private offer")
+    private addDeletePrivateOfferCommand(privateOffersCommand: Command): void {
+        privateOffersCommand.command("delete")
+            .description("Delete a private offer")
             .argument("<id>", "private offer id")
-            .argument("<name>", "new name for the private offer")
-            .action(async (id: string, name: string, _options: unknown, command: Command) => {
+            .action(async (id: string, _options: unknown, command: Command) => {
                 const globals = globalsFrom(command) as GlobalOptions;
                 const privateOffersService = new PrivateOffersService({
                     ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
@@ -60,7 +59,10 @@ export class PrivateOfferCommandsBuilder {
                 });
                 
                 const privateOffer = await privateOffersService.getPrivateOffer(id) as PrivateOffer;
-                privateOffer.name = name;
+
+                return;
+
+                privateOffer.state = "deleted";
 
                 const result = await privateOffersService.postPrivateOfferConfiguration({
                     $schema: PrivateOfferSchemas.Configure,
@@ -70,7 +72,7 @@ export class PrivateOfferCommandsBuilder {
                 });
 
                 console.log(`Result job ID: ${result.jobId}`);
-                console.log(JSON.stringify(result, null, 2));
+                
 
                 // poll for the job to complete
                 const jobService = new JobService({
@@ -83,7 +85,7 @@ export class PrivateOfferCommandsBuilder {
                     job = await jobService.getJobStatus(job.jobId);
                     console.log(JSON.stringify(job, null, 2));
                 }
-                console.error(`Job completed: ${job.jobStatus}`);
+                console.log(`Job completed: ${job.jobStatus}`);
             });
     }
 }
