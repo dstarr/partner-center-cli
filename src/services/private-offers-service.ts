@@ -1,8 +1,9 @@
 import { AuthManager } from "../auth/auth-manager.js";
-import { sendApiRequest } from "../http/client.js";
+import { sendApiRequest, type ApiResponse } from "../http/client.js";
 import { ApiError, fetchAllPages } from "../http/pages.js";
 import { buildUrl, getEndpoint } from "../urls/index.js";
 import type { ConfigureJob } from "./job-service.js";
+import { PrivateOfferFactory } from "./private-offer-configuration-factory.js";
 
 /** `$schema` URLs used by private offer resources. */
 export enum PrivateOfferSchemas {
@@ -11,16 +12,12 @@ export enum PrivateOfferSchemas {
   Configure = "https://schema.mp.microsoft.com/schema/configure/2022-07-01",
 }
 
-export interface PrivateOfferConfiguration {
-  $schema: string;
-  resources: PrivateOffer[];
-}
 
 /** A private offer summary from the Product Ingestion API. */
 export interface PrivateOffer {
-  $schema: string;
+  $schema: PrivateOfferSchemas.PrivateOffer;
   /** Durable id, such as `private-offer/77915369-...`. */
-  id: string;
+  id?: string;
   name: string;
   /** Such as `customerPromotion`, `cspPromotion`, or `multipartyPromotionOriginator`. */
   privateOfferType: string;
@@ -32,6 +29,12 @@ export interface PrivateOffer {
   acceptBy?: string;
   lastModified?: string;
   [property: string]: unknown;
+}
+
+/** A private offer configuration from the Product Ingestion API. */
+export interface PrivateOfferConfiguration {
+  $schema: PrivateOfferSchemas.Configure;
+  resources: PrivateOffer[];
 }
 
 export interface PrivateOffersServiceOptions {
@@ -79,6 +82,20 @@ export class PrivateOffersService {
     return items;
   }
 
+  async createPrivateOffer(name: string): Promise<ConfigureJob> {
+
+    const privateOfferFactory: PrivateOfferFactory = new PrivateOfferFactory();
+                
+    const privateOffer: PrivateOffer = await privateOfferFactory.createPrivateOffer(name);
+
+    const privateOfferConfiguration: PrivateOfferConfiguration = {
+        $schema: PrivateOfferSchemas.Configure,
+        resources: [privateOffer],
+    };
+
+    return await this.postPrivateOfferConfiguration(privateOfferConfiguration);
+  }
+
   /** Fetches one private offer. Accepts the id with or without the `private-offer/` prefix. */
   async getPrivateOffer(id: string): Promise<PrivateOffer> {
     
@@ -114,18 +131,19 @@ export class PrivateOffersService {
     return JSON.parse(response.bodyText) as PrivateOffer;
   }
 
-  async postPrivateOfferConfiguration(configuration: PrivateOfferConfiguration): Promise<ConfigureJob> {
+  async postPrivateOfferConfiguration(configuration: PrivateOfferConfiguration) {
     
-    console.log(configuration, null, 2);
-
     const { url } = buildUrl({
       endpoint: getEndpoint("privateOffers.configure"),
       ...(this.options.baseUrl !== undefined ? { baseUrl: this.options.baseUrl } : {}),
     });
 
-    const body = JSON.stringify(configuration);
+    const body: string = JSON.stringify(configuration, null, 2);
 
-    const response = await sendApiRequest({
+    console.log("--------------------------------");
+    console.log(body);
+
+    const response: ApiResponse = await sendApiRequest({
       url,
       method: "POST",
       accessToken: await this.auth.getAccessToken(),
@@ -134,7 +152,13 @@ export class PrivateOffersService {
       ...(this.options.timeoutMs !== undefined ? { timeoutMs: this.options.timeoutMs } : {}),
       ...(this.options.fetchImpl !== undefined ? { fetchImpl: this.options.fetchImpl } : {}),
     });
+
     if (!response.ok) {
+      console.log("--------------------------------");
+      
+      const errorBody: string = JSON.parse(response.bodyText);
+      console.log(JSON.stringify(errorBody, null, 2));
+
       throw new ApiError(response);
     }
     return JSON.parse(response.bodyText) as ConfigureJob;
