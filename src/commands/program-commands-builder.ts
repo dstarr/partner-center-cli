@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { Command, Option } from "commander";
 import { AuthManager, DEFAULT_RESOURCE } from "../auth/auth-manager.js";
 import type { EndpointService } from "../services/endpoint-service.js";
@@ -161,28 +164,8 @@ export class ProgramCommandBuilder {
     }
 
     private addHelpText(): void {
-        this.program.addHelpText(
-            "after",
-            `
-Examples:
-  partner-center-cli auth
-  partner-center-cli call <id> --query name=value
-  partner-center-cli describe <id>
-  partner-center-cli endpoints
-  partner-center-cli private-offers list
-  partner-center-cli private-offers get <id>
-  partner-center-cli products get <productId> --target-type preview
-  partner-center-cli products getResourceIds <productId> --schema Plan
-  partner-center-cli products getResources <productId> --schema Plan
-  partner-center-cli products getSchemas <productId> --target-type preview
-  partner-center-cli products list
-  partner-center-cli products rename <productId> <alias>
-  partner-center-cli url <id> --param name=value --query name=value
-
-Register APIs in src/urls/bases.ts and add operations in src/urls/endpoints.ts.
-The URL builder checks each path template against its declared parameters.
-`,
-        );
+        const helpTextPath = join(dirname(fileURLToPath(import.meta.url)), "program-help-text.txt");
+        this.program.addHelpText("after", readFileSync(helpTextPath, "utf8"));
     }
 
     private withRequestOptions(command: Command): Command {

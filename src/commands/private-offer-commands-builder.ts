@@ -46,7 +46,7 @@ export class PrivateOfferCommandsBuilder {
                     job = await jobService.getJobStatus(job.jobId);
                     console.log(JSON.stringify(job, null, 2));
                 }
-                console.log(`Job completed: ${job.jobStatus}`);
+                console.log(`Job completed: ${job.jobResult}`);
             });
     }
 

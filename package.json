@@ -8,7 +8,7 @@
     "partner-center-cli": "./dist/index.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp src/commands/program-help-text.txt dist/commands/program-help-text.txt",
     "dev": "tsx src/index.ts",
     "start": "node dist/index.js",
     "test": "node --import tsx --test test/**/*.test.ts",
