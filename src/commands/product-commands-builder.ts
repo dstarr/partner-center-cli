@@ -25,9 +25,9 @@ export class ProductCommandsBuilder {
         this.addGetProductSchemasCommand(productsCommand);
         this.addGetProductResourceIdsCommand(productsCommand);
         this.addGetProductResourcesCommand(productsCommand);
-        this.addListProductCommand(productsCommand);
         this.addRenameProductCommand(productsCommand);
     }
+    
     private addListProductsCommand(productsCommand: Command): void {
         productsCommand.command("list")
             .description("List all products")
@@ -51,18 +51,6 @@ export class ProductCommandsBuilder {
     }
 
     private addGetProductCommand(productsCommand: Command): void {
-        productsCommand.command("getProduct").description("Fetch one product and all of its resources")
-            .argument("<productId>", "product durable id, with or without the product/ prefix")
-            .addOption(new Option("--target-type <type>", "environment to read (default: preview)")
-                .choices([...TARGET_TYPES]))
-            .action(async (productId: string, options: { targetType?: TargetType; }, command: Command) => {
-                const target = options.targetType !== undefined ? { targetType: options.targetType } : {};
-                const product = await this.productsService.getProduct(productId, target);
-                console.log(JSON.stringify(product, null, 2));
-            });
-    }
-
-    private addListProductCommand(productsCommand: Command): void {
         productsCommand
             .command("get")
             .description("Fetch one product and all of its resources")

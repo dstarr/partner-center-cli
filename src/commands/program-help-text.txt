@@ -9,8 +9,8 @@ Examples:
   partner-center-cli private-offers get <id>
   partner-center-cli private-offers list
   partner-center-cli products get <productId> --target-type preview
-  partner-center-cli products getResourceIds <productId>
-  partner-center-cli products getResources <productId>
+  partner-center-cli products getResourceIds <productId> --schema Plan
+  partner-center-cli products getResources <productId> --schema Plan
   partner-center-cli products getSchemas <productId> --target-type preview
   partner-center-cli products list
   partner-center-cli products rename <productId> <alias>
