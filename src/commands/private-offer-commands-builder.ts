@@ -91,26 +91,23 @@ export class PrivateOfferCommandsBuilder {
                     locale: globals.locale,
                 });
                 
-                const privateOffer = await privateOffersService.getPrivateOffer(id) as PrivateOffer;
+                const privateOffer: PrivateOffer = await privateOffersService.getPrivateOffer(id);
 
                 privateOffer.state = "deleted";
 
-                const result = await privateOffersService.postPrivateOfferConfiguration({
+                const result: ConfigureJob = await privateOffersService.postPrivateOfferConfiguration({
                     $schema: PrivateOfferSchemas.Configure,
                     resources: [
                         privateOffer
                     ],
                 });
 
-                console.log(`Result job ID: ${result.jobId}`);
-                
-
                 // poll for the job to complete
-                const jobService = new JobService({
+                const jobService: JobService = new JobService({
                     ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
                     locale: globals.locale,
                 });
-                let job = result;
+                let job: ConfigureJob = result;
                 while (job.jobStatus !== "completed") {
                     await new Promise(resolve => setTimeout(resolve, 1000));
                     job = await jobService.getJobStatus(job.jobId);
