@@ -72,8 +72,9 @@ export const endpoints: readonly Endpoint[] = [
     queryParams: [
       {
         name: "targetType",
-        description: "Environment to read: draft, preview, or live. Omit for draft. Send without quotes.",
+        description: "Environment to read: draft, preview, or live. Defaults to preview when omitted. Send without quotes.",
         required: false,
+        default: "preview",
       },
       {
         name: "$version",

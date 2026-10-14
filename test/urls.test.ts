@@ -61,7 +61,6 @@ describe("services", () => {
     const tree = buildUrl({
       endpoint: getEndpoint("product.get"),
       pathParams: { productId: "abc" },
-      query: { targetType: "preview" },
     });
     assert.equal(
       tree.url.toString(),

@@ -1,7 +1,8 @@
 import { Option, type Command } from "commander";
-import { TARGET_TYPES, ProductsService, type TargetType, type Product } from "../services/products-service.js";
+import { TARGET_TYPES, ProductsService, type TargetType } from "../services/products-service.js";
 import { globalsFrom } from "./options.js";
-import { ProductParser, ProductSchemas } from "../services/products-parser.js";
+import { ProductParser } from "../services/products-parser.js";
+import { MarketplaceSchemas, type MarketplaceSchemaKey } from "../schemas/marketplace-schemas.js";
 import { JobService, type ConfigureJob } from "../services/job-service.js";
 
 export class ProductCommandsBuilder {
@@ -40,7 +41,7 @@ export class ProductCommandsBuilder {
         productsCommand.command("getSchemas")
             .description("List the $schema of the product and each of its resources, one per line")
             .argument("<productId>", "product durable id, with or without the product/ prefix")
-            .addOption(new Option("--target-type <type>", "environment to read (default: draft)")
+            .addOption(new Option("--target-type <type>", "environment to read (default: preview)")
                 .choices([...TARGET_TYPES]))
             .action(async (productId: string, options: { targetType?: TargetType; }) => {
                 const target = options.targetType !== undefined ? { targetType: options.targetType } : {};
@@ -52,7 +53,7 @@ export class ProductCommandsBuilder {
     private addGetProductCommand(productsCommand: Command): void {
         productsCommand.command("getProduct").description("Fetch one product and all of its resources")
             .argument("<productId>", "product durable id, with or without the product/ prefix")
-            .addOption(new Option("--target-type <type>", "environment to read (default: draft)")
+            .addOption(new Option("--target-type <type>", "environment to read (default: preview)")
                 .choices([...TARGET_TYPES]))
             .action(async (productId: string, options: { targetType?: TargetType; }, command: Command) => {
                 const target = options.targetType !== undefined ? { targetType: options.targetType } : {};
@@ -67,7 +68,7 @@ export class ProductCommandsBuilder {
             .description("Fetch one product and all of its resources")
             .argument("<productId>", "product durable id, with or without the product/ prefix")
             .addOption(
-                new Option("--target-type <type>", "environment to read (default: draft)")
+                new Option("--target-type <type>", "environment to read (default: preview)")
                     .choices([...TARGET_TYPES])
             )
             .action(async (productId: string, options: { targetType?: TargetType; }) => {
@@ -85,21 +86,21 @@ export class ProductCommandsBuilder {
             .description("Print each resource in the product as one line of JSON (JSON Lines)")
             .argument("<productId>", "product durable id, with or without the product/ prefix")
             .addOption(
-                new Option("--target-type <type>", "environment to read (default: draft)")
+                new Option("--target-type <type>", "environment to read (default: preview)")
                     .choices([...TARGET_TYPES])
             )
             .addOption(
                 new Option("--schema <name>", "only resources that use this schema")
-                    .choices(Object.keys(ProductSchemas))
+                    .choices([...MarketplaceSchemas.keys()])
             )
             .action(
                 async (
                     productId: string,
-                    options: { targetType?: TargetType; schema?: keyof typeof ProductSchemas; },
+                    options: { targetType?: TargetType; schema?: MarketplaceSchemaKey; },
                 ) => {
                     const target = options.targetType !== undefined ? { targetType: options.targetType } : {};
                     const product = await this.productsService.getProduct(productId, target);
-                    const schema = options.schema !== undefined ? ProductSchemas[options.schema] : undefined;
+                    const schema = options.schema !== undefined ? MarketplaceSchemas.Schemas[options.schema] : undefined;
                     for (const resource of this.productParser.getResources(product, schema)) {
                         console.log(JSON.stringify(resource));
                     }
@@ -112,11 +113,11 @@ export class ProductCommandsBuilder {
             .command("getResourceIds")
             .description("List the ids of the product and each of its resources, one per line")
             .argument("<productId>", "product durable id, with or without the product/ prefix")
-            .addOption(new Option("--target-type <type>", "environment to read (default: draft)")
+            .addOption(new Option("--target-type <type>", "environment to read (default: preview)")
             .choices([...TARGET_TYPES]))
             .addOption(new Option("--schema <name>", "only resources that use this schema")
-            .choices(Object.keys(ProductSchemas)))
-            .action(async (productId: string, options: { targetType?: TargetType; schema?: keyof typeof ProductSchemas; }, command: Command) => {
+            .choices([...MarketplaceSchemas.keys()]))
+            .action(async (productId: string, options: { targetType?: TargetType; schema?: MarketplaceSchemaKey; }, command: Command) => {
 
                 const globals = globalsFrom(command);
                 const manager = new ProductsService({
@@ -126,7 +127,7 @@ export class ProductCommandsBuilder {
                 const target = options.targetType !== undefined ? { targetType: options.targetType } : {};
                 try {
                     const product = await manager.getProduct(productId, target);
-                    const schema = options.schema !== undefined ? ProductSchemas[options.schema] : undefined;
+                    const schema = options.schema !== undefined ? MarketplaceSchemas.Schemas[options.schema] : undefined;
                     for (const id of new ProductParser().getResourceIds(product, schema)) {
                         console.log(id);
                     }
@@ -147,11 +148,11 @@ export class ProductCommandsBuilder {
                 const product = await this.productsService.getProduct(productId);
 
                 // get the product resource by schema
-                const productResource = product.resources.find((resource) => resource.$schema === ProductSchemas.Product);
+                const productResource = product.resources.find((resource) => resource.$schema === MarketplaceSchemas.Schemas.Product);
 
                 // check if the product resource exists
                 if (!productResource) {
-                    console.error(`Product resource with schema ${ProductSchemas.Product} not found`);
+                    console.error(`Product resource with schema ${MarketplaceSchemas.Schemas.Product} not found`);
                     return;
                 }
 
@@ -166,7 +167,7 @@ export class ProductCommandsBuilder {
 
                 // post the new product resource configuration
                 const result = await this.productsService.postProductConfiguration({
-                    $schema: ProductSchemas.Configure,
+                    $schema: MarketplaceSchemas.Schemas.Configure,
                     resources: [
                         productResource
                     ],

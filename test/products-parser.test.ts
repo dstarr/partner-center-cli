@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { ProductParser, ProductSchemas } from "../src/services/products-parser.js";
+import { MarketplaceSchemas } from "../src/schemas/marketplace-schemas.js";
+import { ProductParser } from "../src/services/products-parser.js";
 import type { ProductResourceTree } from "../src/services/products-service.js";
 
 const product: ProductResourceTree = {
@@ -8,10 +9,10 @@ const product: ProductResourceTree = {
   root: "product/abc",
   target: { targetType: "draft" },
   resources: [
-    { $schema: ProductSchemas.Product, id: "product/abc" },
-    { $schema: ProductSchemas.Plan, id: "plan/abc/1" },
-    { $schema: ProductSchemas.Listing, id: "listing/abc/main" },
-    { $schema: ProductSchemas.Plan, id: "plan/abc/2" },
+    { $schema: MarketplaceSchemas.Schemas.Product, id: "product/abc" },
+    { $schema: MarketplaceSchemas.Schemas.Plan, id: "plan/abc/1" },
+    { $schema: MarketplaceSchemas.Schemas.Listing, id: "listing/abc/main" },
+    { $schema: MarketplaceSchemas.Schemas.Plan, id: "plan/abc/2" },
     { $schema: "https://schema.mp.microsoft.com/schema/plan/2099-01-01", id: "plan/abc/3" },
   ],
 };
@@ -21,7 +22,7 @@ describe("ProductParser.getResources", () => {
 
   it("returns every resource with a matching $schema, in tree order", () => {
     assert.deepEqual(
-      parser.getResources(product, ProductSchemas.Plan).map((resource) => resource.id),
+      parser.getResources(product, MarketplaceSchemas.Schemas.Plan).map((resource) => resource.id),
       ["plan/abc/1", "plan/abc/2"],
     );
   });
@@ -31,7 +32,7 @@ describe("ProductParser.getResources", () => {
   });
 
   it("returns an empty array when nothing matches", () => {
-    assert.deepEqual(parser.getResources(product, ProductSchemas.Submission), []);
+    assert.deepEqual(parser.getResources(product, MarketplaceSchemas.Schemas.Submission), []);
   });
 });
 
@@ -49,11 +50,11 @@ describe("ProductParser.getResourceIds", () => {
   });
 
   it("returns only the ids of resources that use the schema", () => {
-    assert.deepEqual(parser.getResourceIds(product, ProductSchemas.Plan), ["plan/abc/1", "plan/abc/2"]);
+    assert.deepEqual(parser.getResourceIds(product, MarketplaceSchemas.Schemas.Plan), ["plan/abc/1", "plan/abc/2"]);
   });
 
   it("skips resources without an id", () => {
-    const withoutIds: ProductResourceTree = { ...product, resources: [{ $schema: ProductSchemas.Plan }] };
+    const withoutIds: ProductResourceTree = { ...product, resources: [{ $schema: MarketplaceSchemas.Schemas.Plan }] };
     assert.deepEqual(parser.getResourceIds(withoutIds), []);
   });
 });

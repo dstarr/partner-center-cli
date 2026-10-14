@@ -1,4 +1,4 @@
-import { ProductSchemas } from "./products-parser.js";
+import { MarketplaceSchemas } from "../schemas/marketplace-schemas.js";
 import type { ProductResource } from "./products-service.js";
 
 /** A product resource to send to the Product Ingestion configure API. */
@@ -11,9 +11,9 @@ export interface ProductConfiguration {
 export class ProductConfigurationFactory {
   public static create(productId: string, alias: string): ProductConfiguration {
     return {
-        $schema: ProductSchemas.Configure,
+        $schema: MarketplaceSchemas.Schemas.Configure,
         resources: [{
-            $schema: ProductSchemas.Product,
+            $schema: MarketplaceSchemas.Schemas.Product,
             id: 'product/' + productId,
             alias: alias,
           },

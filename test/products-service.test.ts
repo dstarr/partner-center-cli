@@ -50,7 +50,7 @@ describe("ProductsService.getProduct", () => {
     assert.equal(result.resources.length, 1);
   });
 
-  it("omits targetType to read the draft", async () => {
+  it("defaults targetType to preview when omitted", async () => {
     let seen = "";
     const manager = new ProductsService({
       auth: fakeAuth(),
@@ -61,7 +61,10 @@ describe("ProductsService.getProduct", () => {
       },
     });
     await manager.getProduct("abc");
-    assert.equal(seen, `${BASE}/resource-tree/product/abc?$version=2022-03-01-preview5`);
+    assert.equal(
+      seen,
+      `${BASE}/resource-tree/product/abc?targetType=preview&$version=2022-03-01-preview5`,
+    );
   });
 
   it("rejects an empty id and an unknown target type", async () => {

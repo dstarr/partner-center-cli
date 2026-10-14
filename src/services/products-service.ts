@@ -87,13 +87,15 @@ export class ProductsService {
 
   /**
    * Fetches one product and all of its resources.
-   * Accepts the durable id with or without the `product/` prefix. Reads the draft unless `targetType` is set.
+   * Accepts the durable id with or without the `product/` prefix.
+   * Uses `preview` when `targetType` is omitted; the resource-tree API rejects requests without `targetType`.
    */
   async getProduct(
     productId: string,
     options: { targetType?: TargetType } = {},
   ): Promise<ProductResourceTree> {
     const id = productId.trim().replace(/^product\//, "");
+
     if (id.length === 0) {
       throw new Error("Product id is required.");
     }
@@ -101,10 +103,12 @@ export class ProductsService {
       throw new Error(`targetType must be one of ${TARGET_TYPES.join(", ")}.`);
     }
 
+    const targetType = options.targetType ?? "preview";
+
     const url = this.url({
       endpoint: getEndpoint("product.get"),
       pathParams: { productId: id },
-      query: { targetType: options.targetType },
+      query: { targetType },
     });
     const response = await sendApiRequest({
       url,
