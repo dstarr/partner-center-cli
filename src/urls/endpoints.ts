@@ -8,10 +8,168 @@ import type { Endpoint, HttpMethod } from "./types.js";
  * To explore a new operation, add it here instead of building a URL by hand.
  */
 export const endpoints: readonly Endpoint[] = [
-  /**
-   * List all products defined by the publisher.
-   */
-  endpoint({
+
+  jobGetEndpoint(),
+  privateOffersConfigureEndpoint(),
+  privateOffersGetEndpoint(),
+  privateOffersListEndpoint(),
+  productsConfigureEndpoint(),
+  productsGetEndpoint(),
+  productsListEndpoint(),
+
+];
+
+const byId = new Map(endpoints.map((item) => [item.id, item]));
+
+function privateOffersGetEndpoint(): Endpoint {
+  return endpoint({
+    id: "privateOffers.get",
+    group: "privateOffers",
+    method: "GET",
+    summary: "Get one private offer by its id.",
+    path: "/private-offer/{id}",
+    service: services.productIngestion,
+    pathParams: [
+      {
+        name: "id",
+        description: "Private offer id, for example 77915369-728d-4cf2-ae81-f2a05ee907b7.",
+      },
+    ],
+    queryParams: [
+      {
+        name: "$version",
+        description: "Schema version of the response.",
+        required: true,
+        default: "2023-07-15",
+      },
+    ],
+    docsUrl: "https://learn.microsoft.com/en-us/partner-center/marketplace-offers/private-offers-api#retrieve-a-private-offer",
+  });
+}
+
+function privateOffersListEndpoint(): Endpoint {
+  return endpoint({
+    id: "privateOffers.list",
+    group: "privateOffers",
+    method: "GET",
+    summary: "List all private offers, including multiparty private offers, associated with the account.",
+    path: "/private-offer/query",
+    service: services.productIngestion,
+    paged: true,
+    pageItemsKey: "privateOffers",
+    pathParams: [],
+    queryParams: [
+      {
+        name: "$version",
+        description: "Schema version of the response.",
+        required: true,
+        default: "2023-07-15",
+      },
+    ],
+    docsUrl: "https://learn.microsoft.com/en-us/partner-center/marketplace-offers/private-offers-api#retrieve-private-offers",
+  });
+}
+
+function jobGetEndpoint(): Endpoint {
+  return endpoint({
+    id: "jobs.get",
+    group: "jobs",
+    method: "GET",
+    summary: "Get the status of a configure job.",
+    path: "/configure/{jobId}/status",
+    service: services.productIngestion,
+    pathParams: [
+      {
+        name: "jobId",
+        description: "Job id returned by a /configure POST, for example a312db6b-83d5-42e2-a6a8-0c09d901f6ae.",
+      },
+    ],
+    queryParams: [
+      {
+        name: "$version",
+        description: "Schema version of the response.",
+        required: true,
+        default: "2022-07-01",
+      },
+    ],
+    docsUrl: "https://learn.microsoft.com/en-us/partner-center/marketplace-offers/product-ingestion-api",
+  });
+}
+
+function privateOffersConfigureEndpoint(): Endpoint {
+  return endpoint({
+    id: "privateOffers.configure",
+    group: "privateOffers",
+    method: "POST",
+    summary: "Post a private offer configuration using the ingestion API.",
+    path: "/configure",
+    service: services.productIngestion,
+    pathParams: [],
+    queryParams: [
+      {
+        name: "$version",
+        description: "Schema version of the response.",
+        required: true,
+        default: "2022-07-01",
+      },
+    ],
+  });
+}
+
+function productsConfigureEndpoint(): Endpoint {
+  return endpoint({
+    id: "product.configure",
+    group: "product",
+    method: "POST",
+    summary: "Post a product configuration using the ingestion API.",
+    path: "/configure",
+    service: services.productIngestion,
+    pathParams: [],
+    queryParams: [
+      {
+        name: "$version",
+        description: "Schema version of the response.",
+        required: true,
+        default: "2022-03-01-preview2",
+      },
+    ],
+  });
+}
+
+function productsGetEndpoint(): Endpoint {
+  return endpoint({
+    id: "product.get",
+    group: "product",
+    method: "GET",
+    summary: "Get a product and all of its resources (plans, listings, pricing, and so on) as a resource tree.",
+    path: "/resource-tree/product/{productId}",
+    service: services.productIngestion,
+    pathParams: [
+      {
+        name: "productId",
+        description: "Product durable id without the product/ prefix, for example 27494b66-e9d3-4b2d-848b-5ce0543abd90.",
+      },
+    ],
+    queryParams: [
+      {
+        name: "targetType",
+        description: "Environment to read: draft, preview, or live. Defaults to preview when omitted. Send without quotes.",
+        required: false,
+        default: "preview",
+      },
+      {
+        name: "$version",
+        description: "Maximum schema version for each resource in the tree.",
+        required: true,
+        default: "2022-03-01-preview5",
+      },
+    ],
+    docsUrl: "https://learn.microsoft.com/en-us/partner-center/marketplace-offers/product-ingestion-api#method-1-resource-tree",
+  });
+}
+
+function productsListEndpoint(): Endpoint {
+  return endpoint({
     id: "products.list",
     group: "products",
     method: "GET",
@@ -48,169 +206,9 @@ export const endpoints: readonly Endpoint[] = [
         required: false,
       },
     ],
-    docsUrl:
-      "https://learn.microsoft.com/en-us/partner-center/marketplace-offers/product-ingestion-api#method-3-query-string-parameters",
-  }),
-  
-  
-  /**
-   * Get a product and all of its resources (plans, listings, pricing, and so on) as a resource tree.
-   */
-  endpoint({
-    id: "product.get",
-    group: "product",
-    method: "GET",
-    summary: "Get a product and all of its resources (plans, listings, pricing, and so on) as a resource tree.",
-    path: "/resource-tree/product/{productId}",
-    service: services.productIngestion,
-    pathParams: [
-      {
-        name: "productId",
-        description: "Product durable id without the product/ prefix, for example 27494b66-e9d3-4b2d-848b-5ce0543abd90.",
-      },
-    ],
-    queryParams: [
-      {
-        name: "targetType",
-        description: "Environment to read: draft, preview, or live. Defaults to preview when omitted. Send without quotes.",
-        required: false,
-        default: "preview",
-      },
-      {
-        name: "$version",
-        description: "Maximum schema version for each resource in the tree.",
-        required: true,
-        default: "2022-03-01-preview5",
-      },
-    ],
-    docsUrl:
-      "https://learn.microsoft.com/en-us/partner-center/marketplace-offers/product-ingestion-api#method-1-resource-tree",
-  }),
-
-  /**
-   * post changes to a product using the ingestion API
-   */
-  endpoint({
-    id: "product.configure",
-    group: "product",
-    method: "POST",
-    summary: "Post a product configuration using the ingestion API.",
-    path: "/configure",
-    service: services.productIngestion,
-    pathParams: [],
-    queryParams: [
-      {
-        name: "$version",
-        description: "Schema version of the response.",
-        required: true,
-        default: "2022-03-01-preview2",
-      },
-    ],
-  }),
-
-  /**
-   * Post a private offer configuration using the ingestion API.
-   */
-  endpoint({
-    id: "privateOffers.configure",
-    group: "privateOffers",
-    method: "POST",
-    summary: "Post a private offer configuration using the ingestion API.",
-    path: "/configure",
-    service: services.productIngestion,
-    pathParams: [],
-    queryParams: [
-      {
-        name: "$version",
-        description: "Schema version of the response.",
-        required: true,
-        default: "2022-07-01",
-      },
-    ],
-  }),
-
-  /**
-   * Get the status of a configure job started by any /configure POST.
-   */
-  endpoint({
-    id: "jobs.get",
-    group: "jobs",
-    method: "GET",
-    summary: "Get the status of a configure job.",
-    path: "/configure/{jobId}/status",
-    service: services.productIngestion,
-    pathParams: [
-      {
-        name: "jobId",
-        description: "Job id returned by a /configure POST, for example a312db6b-83d5-42e2-a6a8-0c09d901f6ae.",
-      },
-    ],
-    queryParams: [
-      {
-        name: "$version",
-        description: "Schema version of the response.",
-        required: true,
-        default: "2022-07-01",
-      },
-    ],
-    docsUrl: "https://learn.microsoft.com/en-us/partner-center/marketplace-offers/product-ingestion-api",
-  }),
-
-  /**
-   * List all private offers, including multiparty private offers.
-   */
-  endpoint({
-    id: "privateOffers.list",
-    group: "privateOffers",
-    method: "GET",
-    summary: "List all private offers, including multiparty private offers, associated with the account.",
-    path: "/private-offer/query",
-    service: services.productIngestion,
-    paged: true,
-    pageItemsKey: "privateOffers",
-    pathParams: [],
-    queryParams: [
-      {
-        name: "$version",
-        description: "Schema version of the response.",
-        required: true,
-        default: "2023-07-15",
-      },
-    ],
-    docsUrl:
-      "https://learn.microsoft.com/en-us/partner-center/marketplace-offers/private-offers-api#retrieve-private-offers",
-  }),
-
-  /**
-   * Get one private offer by its id.
-   */
-  endpoint({
-    id: "privateOffers.get",
-    group: "privateOffers",
-    method: "GET",
-    summary: "Get one private offer by its id.",
-    path: "/private-offer/{id}",
-    service: services.productIngestion,
-    pathParams: [
-      {
-        name: "id",
-        description: "Private offer id, for example 77915369-728d-4cf2-ae81-f2a05ee907b7.",
-      },
-    ],
-    queryParams: [
-      {
-        name: "$version",
-        description: "Schema version of the response.",
-        required: true,
-        default: "2023-07-15",
-      },
-    ],
-    docsUrl:
-      "https://learn.microsoft.com/en-us/partner-center/marketplace-offers/private-offers-api#retrieve-a-private-offer",
-  }),
-];
-
-const byId = new Map(endpoints.map((item) => [item.id, item]));
+    docsUrl: "https://learn.microsoft.com/en-us/partner-center/marketplace-offers/product-ingestion-api#method-3-query-string-parameters",
+  });
+}
 
 export function getEndpoint(id: string): Endpoint {
   const found = byId.get(id);
