@@ -4,6 +4,7 @@ Examples:
   partner-center-cli describe product.get
   partner-center-cli endpoints
   partner-center-cli jobs get <id>
+  partner-center-cli mcp query <query...>
   partner-center-cli private-offers create <name>
   partner-center-cli private-offers delete <id>
   partner-center-cli private-offers get <id>

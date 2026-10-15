@@ -5,6 +5,7 @@ import { ProgramCommandBuilder } from "./commands/program-commands-builder.js";
 import { ProductCommandsBuilder } from "./commands/product-commands-builder.js";
 import { PrivateOfferCommandsBuilder } from "./commands/private-offer-commands-builder.js";
 import { JobCommandsBuilder } from "./commands/job-commands-builder.js";
+import { McpCommandsBuilder } from "./commands/mcp-commands-builder.js";
 
 export function createProgram(): Command {
   const endpointService = new EndpointService();
@@ -15,6 +16,7 @@ export function createProgram(): Command {
   new ProductCommandsBuilder().addProductCommands(program);
   new PrivateOfferCommandsBuilder().addPrivateOfferCommands(program);
   new JobCommandsBuilder().addJobCommands(program);
+  new McpCommandsBuilder().addMcpCommands(program);
 
   return program;
 }
