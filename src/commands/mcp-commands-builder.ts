@@ -1,4 +1,5 @@
 import type { Command } from "commander";
+import { McpService } from "../services/mcp-service.js";
 
 export class McpCommandsBuilder {
     public addMcpCommands(program: Command): void {
@@ -10,12 +11,28 @@ export class McpCommandsBuilder {
     }
 
     private addQueryCommand(mcpCommand: Command): void {
+
         mcpCommand
-            .command("query")
-            .description("Run a query string (placeholder: echoes the input)")
-            .argument("<query...>", "arbitrary query text")
-            .action((queryParts: string[]) => {
-                console.log(queryParts.join(" "));
+            .command("version")
+            .description("Get the server version")
+            .action(async () => {
+
+                console.log("Version command");
+                console.log("This feature is not implemented yet");
+                
+                
+                // Connect to the MCP server
+                // const mcpService = new McpService();
+                // await mcpService.connect().then(() => {
+                //     console.log("Connected to MCP server successfully");
+                // });
+
+                // // Get the server version
+                // const serverVersion = await mcpService.getServerVersion();
+                // console.log(`Server version: ${serverVersion}`);
+
+                // // Disconnect from the MCP server
+                // await mcpService.disconnect();
             });
     }
 }
