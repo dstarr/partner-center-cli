@@ -25,9 +25,9 @@ interface CallOptions extends RequestOptions {
 }
 
 export class ProgramCommandBuilder {
-    
+
     private readonly program: Command;
-    
+
     constructor(
         private readonly endpointService: EndpointService,
         private readonly requestService: RequestService,
@@ -38,13 +38,13 @@ export class ProgramCommandBuilder {
     public getProgramCommand(): Command {
 
         this.addApiExplorerCommand();
-        this.addEndpointsCommand();
         this.addAuthCommand();
-        this.addDescribeCommand();
-        this.addUrlCommand();
         this.addCallCommand();
+        this.addDescribeCommand();
+        this.addEndpointsCommand();
         this.addHelpText();
-        
+        this.addUrlCommand();
+
         return this.program;
     }
 
@@ -55,9 +55,9 @@ export class ProgramCommandBuilder {
             .version("0.1.0")
             .option("--base-url <url>", "https origin to use instead of the service base URL")
             .addOption(
-            new Option("--locale <locale>", "value for the X-Locale header")
-                .env("PARTNER_CENTER_LOCALE")
-                .default("en-US"),
+                new Option("--locale <locale>", "value for the X-Locale header")
+                    .env("PARTNER_CENTER_LOCALE")
+                    .default("en-US"),
             );
     }
 

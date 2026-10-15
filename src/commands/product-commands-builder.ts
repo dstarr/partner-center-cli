@@ -20,15 +20,15 @@ export class ProductCommandsBuilder {
 
         const productsCommand = program.command("products").description("Work with products through the ProductsService");
 
-        this.addListProductsCommand(productsCommand);
-        this.addGetProductCommand(productsCommand);
-        this.addGetProductSchemasCommand(productsCommand);
-        this.addGetProductResourceIdsCommand(productsCommand);
-        this.addGetProductResourcesCommand(productsCommand);
-        this.addRenameProductCommand(productsCommand);
+        this.getProductCommand(productsCommand);
+        this.getProductResourceIdsCommand(productsCommand);
+        this.getProductResourcesCommand(productsCommand);
+        this.getProductSchemasCommand(productsCommand);
+        this.listProductsCommand(productsCommand);
+        this.renameProductCommand(productsCommand);
     }
     
-    private addListProductsCommand(productsCommand: Command): void {
+    private listProductsCommand(productsCommand: Command): void {
         productsCommand.command("list")
             .description("List all products")
             .action(async () => {
@@ -37,7 +37,7 @@ export class ProductCommandsBuilder {
             });
     }
 
-    private addGetProductSchemasCommand(productsCommand: Command): void {
+    private getProductSchemasCommand(productsCommand: Command): void {
         productsCommand.command("getSchemas")
             .description("List the $schema of the product and each of its resources, one per line")
             .argument("<productId>", "product durable id, with or without the product/ prefix")
@@ -50,7 +50,7 @@ export class ProductCommandsBuilder {
             });
     }
 
-    private addGetProductCommand(productsCommand: Command): void {
+    private getProductCommand(productsCommand: Command): void {
         productsCommand
             .command("get")
             .description("Fetch one product and all of its resources")
@@ -68,7 +68,7 @@ export class ProductCommandsBuilder {
     }
 
 
-    private addGetProductResourcesCommand(productsCommand: Command): void {
+    private getProductResourcesCommand(productsCommand: Command): void {
         productsCommand
             .command("getResources")
             .description("Print each resource in the product as one line of JSON (JSON Lines)")
@@ -96,7 +96,7 @@ export class ProductCommandsBuilder {
             );
     }
 
-    private addGetProductResourceIdsCommand(productsCommand: Command): void {
+    private getProductResourceIdsCommand(productsCommand: Command): void {
         productsCommand
             .command("getResourceIds")
             .description("List the ids of the product and each of its resources, one per line")
@@ -126,7 +126,7 @@ export class ProductCommandsBuilder {
             );
     }
 
-    private addRenameProductCommand(productsCommand: Command): void {
+    private renameProductCommand(productsCommand: Command): void {
         productsCommand.command("rename")
             .description("Post a new alias for a product")
             .argument("<productId>", "product durable id, without the product/ prefix")

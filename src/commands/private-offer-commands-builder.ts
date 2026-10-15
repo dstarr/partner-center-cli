@@ -13,13 +13,13 @@ export class PrivateOfferCommandsBuilder {
             .description("Work with private offers through the PrivateOffersService");
 
         
-        this.addCreatePrivateOfferCommand(privateOffersCommand);
-        this.addDeletePrivateOfferCommand(privateOffersCommand);
-        this.addGetPrivateOfferCommand(privateOffersCommand);
-        this.addListPrivateOffersCommand(privateOffersCommand);
+        this.createPrivateOfferCommand(privateOffersCommand);
+        this.deletePrivateOfferCommand(privateOffersCommand);
+        this.getPrivateOfferCommand(privateOffersCommand);
+        this.listPrivateOffersCommand(privateOffersCommand);
     }
     
-    private addCreatePrivateOfferCommand(privateOffersCommand: Command): void {
+    private createPrivateOfferCommand(privateOffersCommand: Command): void {
         privateOffersCommand.command("create")
             .description("Create a new private offer")
             .argument("<name>", "name of the private offer")
@@ -50,7 +50,7 @@ export class PrivateOfferCommandsBuilder {
             });
     }
 
-    private addListPrivateOffersCommand(privateOffersCommand: Command): void {
+    private listPrivateOffersCommand(privateOffersCommand: Command): void {
         privateOffersCommand.command("list")
             .description("List all private offers, including multiparty private offers")
             .action(async (_options: unknown, command: Command) => {
@@ -64,7 +64,7 @@ export class PrivateOfferCommandsBuilder {
             });
     }
 
-    private addGetPrivateOfferCommand(privateOffersCommand: Command): void {
+    private getPrivateOfferCommand(privateOffersCommand: Command): void {
         privateOffersCommand.command("get")
             .description("Get a private offer by its id")
             .argument("<id>", "private offer id")
@@ -80,7 +80,7 @@ export class PrivateOfferCommandsBuilder {
             });
     }
 
-    private addDeletePrivateOfferCommand(privateOffersCommand: Command): void {
+    private deletePrivateOfferCommand(privateOffersCommand: Command): void {
         privateOffersCommand.command("delete")
             .description("Delete a private offer")
             .argument("<id>", "private offer id")

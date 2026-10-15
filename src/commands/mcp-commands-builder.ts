@@ -7,10 +7,10 @@ export class McpCommandsBuilder {
             .command("mcp")
             .description("Model Context Protocol helpers");
 
-        this.addQueryCommand(mcpCommand);
+        this.queryCommand(mcpCommand);
     }
 
-    private addQueryCommand(mcpCommand: Command): void {
+    private queryCommand(mcpCommand: Command): void {
 
         mcpCommand
             .command("version")
