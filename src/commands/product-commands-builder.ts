@@ -41,8 +41,11 @@ export class ProductCommandsBuilder {
         productsCommand.command("getSchemas")
             .description("List the $schema of the product and each of its resources, one per line")
             .argument("<productId>", "product durable id, with or without the product/ prefix")
-            .addOption(new Option("--target-type <type>", "environment to read (default: preview)")
-                .choices([...TARGET_TYPES]))
+            .addOption(
+                new Option("--target-type <type>", "environment to read (default: preview)")
+                    .choices([...TARGET_TYPES])
+                    .default("draft")
+            )
             .action(async (productId: string, options: { targetType?: TargetType; }) => {
                 const target = options.targetType !== undefined ? { targetType: options.targetType } : {};
                 const schemas = await this.productsService.getProductResourceSchemas(productId, target);
@@ -56,8 +59,9 @@ export class ProductCommandsBuilder {
             .description("Fetch one product and all of its resources")
             .argument("<productId>", "product durable id, with or without the product/ prefix")
             .addOption(
-                new Option("--target-type <type>", "environment to read (default: preview)")
+                new Option("--target-type <type>", "Partner Center environment to read from")
                     .choices([...TARGET_TYPES])
+                    .default("draft")
             )
             .action(async (productId: string, options: { targetType?: TargetType; }) => {
                 const target = options.targetType !== undefined ? { targetType: options.targetType } : {};
@@ -67,15 +71,15 @@ export class ProductCommandsBuilder {
             });
     }
 
-
     private getProductResourcesCommand(productsCommand: Command): void {
         productsCommand
             .command("getResources")
             .description("Print each resource in the product as one line of JSON (JSON Lines)")
             .argument("<productId>", "product durable id, with or without the product/ prefix")
             .addOption(
-                new Option("--target-type <type>", "environment to read (default: preview)")
+                new Option("--target-type <type>", "Partner Center environment to read from")
                     .choices([...TARGET_TYPES])
+                    .default("draft")
             )
             .addOption(
                 new Option("--schema <name>", "only resources that use this schema")

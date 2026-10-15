@@ -16,9 +16,9 @@ export interface Product {
   [property: string]: unknown;
 }
 
-export type TargetType = "draft" | "preview" | "live";
+export const TARGET_TYPES = ["draft", "preview", "live"] as const;
 
-export const TARGET_TYPES: readonly TargetType[] = ["draft", "preview", "live"];
+export type TargetType = (typeof TARGET_TYPES)[number];
 
 /** One resource in a product resource tree, such as a plan, listing, or submission. */
 export interface ProductResource {
@@ -106,7 +106,7 @@ export class ProductsService {
     const targetType = options.targetType ?? "preview";
 
     const url = this.url({
-      endpoint: getEndpoint("product.get"),
+      endpoint: getEndpoint("product.get"), 
       pathParams: { productId: id },
       query: { targetType },
     });
