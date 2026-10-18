@@ -1,3 +1,21 @@
+NEW SCHEMA VERSIONS
+
+https://schema.mp.microsoft.com/schema/commercial-marketplace-setup/2026-10-01
+https://schema.mp.microsoft.com/schema/customer-leads/2026-10-01
+https://schema.mp.microsoft.com/schema/listing-asset/2026-10-01
+https://schema.mp.microsoft.com/schema/microsoft365-integration/2026-10-01
+https://schema.mp.microsoft.com/schema/plan-listing/2026-10-01
+https://schema.mp.microsoft.com/schema/plan/2026-10-01
+https://schema.mp.microsoft.com/schema/price-and-availability-custom-meter/2026-10-01-preview2
+https://schema.mp.microsoft.com/schema/price-and-availability-plan/2026-10-01-preview2
+https://schema.mp.microsoft.com/schema/product/2026-10-01
+https://schema.mp.microsoft.com/schema/property/2026-10-01
+https://schema.mp.microsoft.com/schema/reseller/2026-10-01-preview2
+https://schema.mp.microsoft.com/schema/software-as-a-service-technical-configuration/2026-10-01
+https://schema.mp.microsoft.com/schema/submission/2022-03-01-preview2
+
+OLD VERSIONS
+
 https://schema.mp.microsoft.com/schema/product/2022-03-01-preview3
 https://schema.mp.microsoft.com/schema/customer-leads/2022-03-01-preview3
 https://schema.mp.microsoft.com/schema/microsoft365-integration/2022-03-01-preview2

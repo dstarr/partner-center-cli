@@ -6,7 +6,7 @@ describe("MarketplaceSchemas", () => {
   it("builds default product schema URLs", () => {
     assert.equal(
       MarketplaceSchemas.Schemas.Plan,
-      "https://schema.mp.microsoft.com/schema/plan/2022-03-01-preview3",
+      "https://schema.mp.microsoft.com/schema/plan/2026-10-01",
     );
   });
 
@@ -16,12 +16,12 @@ describe("MarketplaceSchemas", () => {
     });
     assert.equal(
       MarketplaceSchemas.Schemas.Plan,
-      "https://schemas.example.test/schema/plan/2022-03-01-preview3",
+      "https://schemas.example.test/schema/plan/2026-10-01",
     );
     new MarketplaceSchemasRegistry({});
     assert.equal(
       MarketplaceSchemas.Schemas.Plan,
-      "https://schema.mp.microsoft.com/schema/plan/2022-03-01-preview3",
+      "https://schema.mp.microsoft.com/schema/plan/2026-10-01",
     );
   });
 
@@ -29,7 +29,7 @@ describe("MarketplaceSchemas", () => {
     assert.ok(MarketplaceSchemas.keys().includes("Plan"));
     assert.equal(
       MarketplaceSchemas.Schemas.Plan,
-      "https://schema.mp.microsoft.com/schema/plan/2022-03-01-preview3",
+      "https://schema.mp.microsoft.com/schema/plan/2026-10-01",
     );
   });
 });

@@ -103,7 +103,7 @@ export class ProductsService {
       throw new Error(`targetType must be one of ${TARGET_TYPES.join(", ")}.`);
     }
 
-    const targetType = options.targetType ?? "preview";
+    const targetType = options.targetType ?? "draft";
 
     const url = this.url({
       endpoint: getEndpoint("product.get"), 
