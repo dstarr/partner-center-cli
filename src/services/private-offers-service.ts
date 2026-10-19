@@ -23,6 +23,7 @@ export interface PrivateOffer {
   privateOfferType: string;
   /** Such as `draft`, `live`, or `withdrawn`. */
   state: string;
+  subState?: string;
   variableStartDate?: boolean;
   start?: string;
   end?: string;
@@ -35,6 +36,12 @@ export interface PrivateOffer {
 export interface PrivateOfferConfiguration {
   $schema: PrivateOfferSchemas.Configure;
   resources: PrivateOffer[];
+}
+
+export interface PrivateOfferListFilter {
+  name?: string;
+  state?: string;
+  subState?: string;
 }
 
 export interface PrivateOffersServiceOptions {
@@ -73,6 +80,33 @@ export class PrivateOffersService {
       ...(this.options.fetchImpl !== undefined ? { fetchImpl: this.options.fetchImpl } : {}),
     });
     return items;
+  }
+
+  /** Fetches every private offer, then applies optional client-side filters. */
+  async listPrivateOffers(filters: PrivateOfferListFilter = {}): Promise<PrivateOffer[]> {
+    return this.filterPrivateOffers(await this.getAllPrivateOffers(), filters);
+  }
+
+  filterPrivateOffers(offers: readonly PrivateOffer[], filters: PrivateOfferListFilter): PrivateOffer[] {
+    const name = filters.name?.trim();
+    const state = filters.state?.trim();
+    const subState = filters.subState?.trim();
+    if (!name && !state && !subState) {
+      return [...offers];
+    }
+    const nameLower = name?.toLowerCase();
+    return offers.filter((offer) => {
+      if (nameLower !== undefined && !offer.name.toLowerCase().includes(nameLower)) {
+        return false;
+      }
+      if (state !== undefined && offer.state !== state) {
+        return false;
+      }
+      if (subState !== undefined && offer.subState !== subState) {
+        return false;
+      }
+      return true;
+    });
   }
 
   async createPrivateOffer(name: string): Promise<ConfigureJob> {

@@ -64,3 +64,19 @@ describe("PrivateOffersService.getAllPrivateOffers", () => {
     await assert.rejects(service.getAllPrivateOffers(), /privateOffers array/);
   });
 });
+
+describe("PrivateOffersService.filterPrivateOffers", () => {
+  const offers = [
+    { name: "Contoso Demo", state: "draft", subState: "pendingAcceptance", privateOfferType: "customerPromotion" },
+    { name: "Fabrikam Offer", state: "live", subState: "active", privateOfferType: "customerPromotion" },
+  ] as const;
+
+  it("filters by name, state, and subState", () => {
+    const service = new PrivateOffersService({ auth: fakeAuth() });
+    assert.deepEqual(service.filterPrivateOffers(offers, { name: "contoso" }), [offers[0]]);
+    assert.deepEqual(service.filterPrivateOffers(offers, { state: "live" }), [offers[1]]);
+    assert.deepEqual(service.filterPrivateOffers(offers, { subState: "active" }), [offers[1]]);
+    assert.deepEqual(service.filterPrivateOffers(offers, { name: "Offer", state: "live" }), [offers[1]]);
+    assert.deepEqual(service.filterPrivateOffers(offers, {}), [...offers]);
+  });
+});

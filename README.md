@@ -80,7 +80,7 @@ For `--schema`, `<name>` is a marketplace schema key (for example `Plan`, `Produ
 
 | Command | Description |
 | --- | --- |
-| `private-offers list` | List private offers, including multiparty offers |
+| `private-offers list [--name <name>] [--state <state>] [--sub-state <subState>]` | List private offers (optional client-side filters) |
 | `private-offers get <id>` | Get one private offer by id |
 | `private-offers create <name>` | Create a private offer (polls configure job until complete) |
 | `private-offers delete <id>` | Mark a private offer deleted via configure (polls job until complete) |

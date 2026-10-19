@@ -1,5 +1,9 @@
 import type { Command } from "commander";
-import { PrivateOffersService, type PrivateOffer } from "../services/private-offers-service.js";
+import {
+    PrivateOffersService,
+    type PrivateOffer,
+    type PrivateOfferListFilter,
+} from "../services/private-offers-service.js";
 import { PrivateOfferSchemas } from "../services/private-offers-service.js";
 import { JobService, type ConfigureJob } from "../services/job-service.js";
 import { PrivateOfferFactory } from "../services/private-offer-configuration-factory.js";
@@ -43,9 +47,12 @@ export class PrivateOfferCommandsBuilder {
     private listPrivateOffersCommand(privateOffersCommand: Command): void {
         privateOffersCommand.command("list")
             .description("List all private offers, including multiparty private offers")
-            .action(async () => {
+            .option("--name <name>", "keep offers whose name contains this text (case-insensitive)")
+            .option("--state <state>", "keep offers with this state (for example draft, live, withdrawn)")
+            .option("--sub-state <subState>", "keep offers with this subState")
+            .action(async (options: PrivateOfferListFilter) => {
                 const privateOffersService = new PrivateOffersService();
-                const privateOffers = await privateOffersService.getAllPrivateOffers();
+                const privateOffers = await privateOffersService.listPrivateOffers(options);
                 console.log(JSON.stringify(privateOffers, null, 2));
             });
     }
