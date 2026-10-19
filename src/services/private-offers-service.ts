@@ -69,7 +69,7 @@ export class PrivateOffersService {
   }
 
   /** Fetches every private offer, including multiparty private offers, following all result pages. */
-  async getAllPrivateOffers(): Promise<PrivateOffer[]> {
+  public async getAllPrivateOffers(): Promise<PrivateOffer[]> {
     const endpoint = getEndpoint("privateOffers.list");
     const { url } = buildUrl({ endpoint });
     const { items } = await fetchAllPages<PrivateOffer>({
@@ -87,7 +87,7 @@ export class PrivateOffersService {
     return this.filterPrivateOffers(await this.getAllPrivateOffers(), filters);
   }
 
-  filterPrivateOffers(offers: readonly PrivateOffer[], filters: PrivateOfferListFilter): PrivateOffer[] {
+  private filterPrivateOffers(offers: readonly PrivateOffer[], filters: PrivateOfferListFilter): PrivateOffer[] {
     const name = filters.name?.trim();
     const state = filters.state?.trim();
     const subState = filters.subState?.trim();
