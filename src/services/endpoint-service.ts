@@ -4,7 +4,7 @@ import { endpointGroups, listEndpoints } from "../urls/endpoints.js";
 
 /** Prints catalog endpoints for the `endpoints` and `describe` commands. */
 export class EndpointService {
-  printEndpointList(filter: { group?: string; method?: HttpMethod }): void {
+  public printEndpointList(filter: { group?: string; method?: HttpMethod }): void {
     if (listEndpoints().length === 0) {
       console.error("The catalog is empty. Add endpoints in src/urls/endpoints.ts.");
       return;
@@ -24,13 +24,13 @@ export class EndpointService {
     console.log(lines.join("\n"));
   }
 
-  printEndpointJson(filter: { group?: string; method?: HttpMethod }): void {
+  public printEndpointJson(filter: { group?: string; method?: HttpMethod }): void {
     this.assertKnownGroup(filter.group);
     const items = listEndpoints(filter).map((item) => this.toJson(item));
     console.log(JSON.stringify(items, null, 2));
   }
 
-  printEndpoint(item: Endpoint): void {
+  public printEndpoint(item: Endpoint): void {
     console.log(item.id);
     console.log(`${item.method} ${item.path}`);
     console.log("");

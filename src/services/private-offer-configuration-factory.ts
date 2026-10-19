@@ -1,28 +1,27 @@
-import { PrivateOfferSchemas, type PrivateOffer } from "./private-offers-service.js";
+import { PrivateOfferSchemas, type PrivateOffer } from "./private-offer-types.js";
 
-/**
- * This factory is used to create a private offer configuration.
- * It is used to create a private offer configuration for a given product.
- */
+/** Builds draft private-offer resources for configure requests. */
 export class PrivateOfferFactory {
 
-  async createPrivateOffer(name: string): Promise<PrivateOffer> {
-
-    const endDate: Date = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000); // 1 month from now
-    const endDateString: string = endDate.toISOString().slice(0, 10);
-
+  public async createPrivateOffer(name: string): Promise<PrivateOffer> {
+    const endDateString = this.defaultEndDateString();
     return {
-              "$schema": PrivateOfferSchemas.PrivateOffer as string,
-              "name": name,
-              "state": "draft",
-              "privateOfferType": "customerPromotion",
-              "offerPricingType": "editExistingOfferPricingOnly",
-              "customerContractRenewal": false,
-              "variableStartDate": true,
-              "end": endDateString,
-              "acceptBy": endDateString,
-              "preparedBy": "david@cumulus26.com",
-              "notificationContacts": [ "david@cumulus26.com" ],
-            } as PrivateOffer;
-    }
+      $schema: PrivateOfferSchemas.PrivateOffer as string,
+      name,
+      state: "draft",
+      privateOfferType: "customerPromotion",
+      offerPricingType: "editExistingOfferPricingOnly",
+      customerContractRenewal: false,
+      variableStartDate: true,
+      end: endDateString,
+      acceptBy: endDateString,
+      preparedBy: "david@cumulus26.com",
+      notificationContacts: ["david@cumulus26.com"],
+    } as PrivateOffer;
+  }
+
+  private defaultEndDateString(): string {
+    const endDate = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000);
+    return endDate.toISOString().slice(0, 10);
+  }
 }

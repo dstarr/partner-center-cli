@@ -54,7 +54,7 @@ export class AuthManager {
   private cached: AccessToken | undefined;
   private pending: Promise<AccessToken> | undefined;
 
-  constructor(options: AuthManagerOptions) {
+  public constructor(options: AuthManagerOptions) {
     const tenantId = requireValue(options.tenantId, "tenantId");
     if (!TENANT_PATTERN.test(tenantId)) {
       throw new AuthError(
@@ -80,7 +80,7 @@ export class AuthManager {
   }
 
   /** Reads credentials from PARTNER_CENTER_TENANT_ID, _CLIENT_ID, and _CLIENT_SECRET. */
-  static fromEnv(
+  public static fromEnv(
     env: NodeJS.ProcessEnv = process.env,
     options: Omit<AuthManagerOptions, keyof AuthCredentials> = {},
   ): AuthManager {
@@ -102,12 +102,12 @@ export class AuthManager {
     });
   }
 
-  get loginUrl(): string {
+  public get loginUrl(): string {
     return this.tokenUrl.toString();
   }
 
   /** Returns a cached token while it is still valid, otherwise requests a new one. */
-  async getToken(options: { forceRefresh?: boolean } = {}): Promise<AccessToken> {
+  public async getToken(options: { forceRefresh?: boolean } = {}): Promise<AccessToken> {
     if (!options.forceRefresh && this.cached && this.isFresh(this.cached)) {
       return this.cached;
     }
@@ -120,11 +120,11 @@ export class AuthManager {
     return this.cached;
   }
 
-  async getAccessToken(): Promise<string> {
+  public async getAccessToken(): Promise<string> {
     return (await this.getToken()).accessToken;
   }
 
-  clear(): void {
+  public clear(): void {
     this.cached = undefined;
   }
 

@@ -4,7 +4,7 @@ export class McpService {
   private client: Client;
   private transport: StreamableHTTPClientTransport;
 
-  constructor() {
+  public constructor() {
     const mcpServerUrl = process.env.MCP_SERVER_URL || 'https://ingestion-mcp.marketplace-ingestion.mp.microsoft.com/mcp';
 
     this.client = new Client({ 

@@ -4,16 +4,20 @@ import {
     type PrivateOffer,
     type PrivateOfferListFilter,
 } from "../services/private-offers-service.js";
-import { JobService, type ConfigureJob } from "../services/job-service.js";
+import { ConfigureJobPoller } from "../services/configure-job-poller.js";
 
 export class PrivateOfferCommandsBuilder {
-    
+    private readonly jobPoller: ConfigureJobPoller;
+
+    public constructor() {
+        this.jobPoller = new ConfigureJobPoller();
+    }
+
     public addPrivateOfferCommands(program: Command): void {
         const privateOffersCommand = program
             .command("private-offers")
             .description("Work with private offers through the PrivateOffersService");
 
-        
         this.createPrivateOfferCommand(privateOffersCommand);
         this.deletePrivateOfferCommand(privateOffersCommand);
         this.getPrivateOfferCommand(privateOffersCommand);
@@ -28,7 +32,7 @@ export class PrivateOfferCommandsBuilder {
             .action(async (name: string) => {
                 const privateOffersService = new PrivateOffersService();
                 const result = await privateOffersService.createPrivateOffer(name);
-                await this.pollJobUntilComplete(result);
+                await this.jobPoller.pollUntilComplete(result);
             });
     }
 
@@ -64,7 +68,7 @@ export class PrivateOfferCommandsBuilder {
             .action(async (id: string) => {
                 const privateOffersService = new PrivateOffersService();
                 const result = await privateOffersService.deletePrivateOffer(id);
-                await this.pollJobUntilComplete(result);
+                await this.jobPoller.pollUntilComplete(result);
             });
     }
 
@@ -75,18 +79,7 @@ export class PrivateOfferCommandsBuilder {
             .action(async (id: string) => {
                 const privateOffersService = new PrivateOffersService();
                 const result = await privateOffersService.withdrawPrivateOffer(id);
-                await this.pollJobUntilComplete(result);
+                await this.jobPoller.pollUntilComplete(result);
             });
-    }
-
-    private async pollJobUntilComplete(result: ConfigureJob): Promise<void> {
-        const jobService = new JobService();
-        let job: ConfigureJob = result;
-        while (job.jobStatus !== "completed") {
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-            job = await jobService.getJobStatus(job.jobId);
-            console.log(JSON.stringify(job, null, 2));
-        }
-        console.log(`Job completed: ${job.jobResult ?? job.jobStatus}`);
     }
 }

@@ -6,7 +6,6 @@ import { AuthManager, DEFAULT_RESOURCE } from "../auth/auth-manager.js";
 import type { EndpointService } from "../services/endpoint-service.js";
 import type { RequestService } from "../services/request-service.js";
 import { getEndpoint, type HttpMethod } from "../urls/index.js";
-import { collect } from "./options.js";
 
 const METHODS: readonly HttpMethod[] = ["GET", "POST", "PATCH", "PUT", "DELETE"];
 
@@ -28,7 +27,7 @@ export class ProgramCommandBuilder {
 
     private readonly program: Command;
 
-    constructor(
+    public constructor(
         private readonly endpointService: EndpointService,
         private readonly requestService: RequestService,
     ) {
@@ -159,8 +158,13 @@ export class ProgramCommandBuilder {
 
     private withRequestOptions(command: Command): Command {
         return command
-            .option("--param <name=value>", "path parameter (repeatable)", collect, [])
-            .option("--query <name=value>", "query parameter (repeatable)", collect, [])
+            .option("--param <name=value>", "path parameter (repeatable)", ProgramCommandBuilder.collect, [])
+            .option("--query <name=value>", "query parameter (repeatable)", ProgramCommandBuilder.collect, [])
             .option("--allow-query", "send query parameters that are not in the catalog");
+    }
+
+    /** Commander option parser that accumulates a repeatable flag into an array. */
+    private static collect(value: string, previous: string[]): string[] {
+        return [...previous, value];
     }
 }

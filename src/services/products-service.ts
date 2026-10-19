@@ -1,7 +1,8 @@
 import { AuthManager } from "../auth/auth-manager.js";
-import { sendApiRequest } from "../http/client.js";
+import { sendApiRequest, type ApiResponse } from "../http/client.js";
 import { ApiError, fetchAllPages } from "../http/pages.js";
 import { buildUrl, getEndpoint, type BuildUrlInput } from "../urls/index.js";
+import { MarketplaceSchemasRegistry } from "../schemas/marketplace-schemas.js";
 import type { ProductConfiguration } from "./product-configuration-factory.js";
 
 /** A product resource from the Product Ingestion API. */
@@ -49,20 +50,15 @@ export class ProductsService {
   private readonly auth: AuthManager;
   private readonly options: Omit<ProductsServiceOptions, "auth">;
 
-  constructor(options: ProductsServiceOptions = {}) {
+  public constructor(options: ProductsServiceOptions = {}) {
     const { auth, ...rest } = options;
     this.options = rest;
-    if (auth) {
-      this.auth = auth;
-    } else {
-      const { resource } = getEndpoint("products.list").service;
-      this.auth = AuthManager.fromEnv(process.env, resource ? { resource } : {});
-    }
+    this.auth = auth ?? this.createDefaultAuth();
   }
 
   /** Fetches every product the publisher has defined, following all result pages. */
-  async getAllProducts(): Promise<Product[]> {
-    const url = this.url({ endpoint: getEndpoint("products.list") });
+  public async getAllProducts(): Promise<Product[]> {
+    const url = this.buildUrl({ endpoint: getEndpoint("products.list") });
     const { items } = await fetchAllPages<Product>({
       url,
       accessToken: await this.auth.getAccessToken(),
@@ -71,10 +67,8 @@ export class ProductsService {
     return items;
   }
 
-  /**
-   * Fetches the resource schemas for one product and all of its resources.
-   */
-  async getProductResourceSchemas(
+  /** Fetches the resource schemas for one product and all of its resources. */
+  public async getProductResourceSchemas(
     productId: string,
     options: { targetType?: TargetType } = {},
   ): Promise<string[]> {
@@ -85,50 +79,102 @@ export class ProductsService {
   /**
    * Fetches one product and all of its resources.
    * Accepts the durable id with or without the `product/` prefix.
-   * Uses `preview` when `targetType` is omitted; the resource-tree API rejects requests without `targetType`.
    */
-  async getProduct(
+  public async getProduct(
     productId: string,
     options: { targetType?: TargetType } = {},
   ): Promise<ProductResourceTree> {
-    const id = productId.trim().replace(/^product\//, "");
+    const id = this.normalizeProductId(productId);
+    const url = this.buildUrl({
+      endpoint: getEndpoint("product.get"),
+      pathParams: { productId: id },
+      ...this.productGetQuery(options.targetType),
+    });
+    const response = await this.sendGet(url);
+    return this.parseProductTree(response);
+  }
 
+  /** Posts a product alias change for the product resource in the resource tree. */
+  public async renameProduct(productId: string, alias: string): Promise<string> {
+    const product = await this.getProduct(productId);
+    const productResource = this.findProductResource(product);
+    this.assertAliasChange(productResource, alias);
+    productResource.alias = alias;
+    return this.postProductConfiguration({
+      $schema: MarketplaceSchemasRegistry.Schemas.Configure,
+      resources: [productResource],
+    });
+  }
+
+  /** Post a product configuration using the ingestion API. */
+  public async postProductConfiguration(configuration: ProductConfiguration): Promise<string> {
+    const url = this.buildUrl({
+      endpoint: getEndpoint("product.configure"),
+    });
+    const response = await this.sendPost(url, JSON.stringify(configuration));
+    return response.bodyText;
+  }
+
+  private findProductResource(product: ProductResourceTree): ProductResource {
+    const productResource = product.resources.find(
+      (resource) => resource.$schema === MarketplaceSchemasRegistry.Schemas.Product,
+    );
+    if (productResource === undefined) {
+      throw new Error(`Product resource with schema ${MarketplaceSchemasRegistry.Schemas.Product} not found`);
+    }
+    return productResource;
+  }
+
+  private assertAliasChange(productResource: ProductResource, alias: string): void {
+    if (productResource.alias === alias) {
+      throw new Error(`Product already has alias ${alias}`);
+    }
+  }
+
+  private normalizeProductId(productId: string): string {
+    const id = productId.trim().replace(/^product\//, "");
     if (id.length === 0) {
       throw new Error("Product id is required.");
     }
-    if (options.targetType !== undefined && !TARGET_TYPES.includes(options.targetType)) {
+    return id;
+  }
+
+  private productGetQuery(targetType: TargetType | undefined): { query: { targetType: TargetType } } | Record<string, never> {
+    if (targetType === undefined) {
+      return {};
+    }
+    if (!TARGET_TYPES.includes(targetType)) {
       throw new Error(`targetType must be one of ${TARGET_TYPES.join(", ")}.`);
     }
+    return { query: { targetType } };
+  }
 
-    const targetType = options.targetType ?? "draft";
-
-    const url = this.url({
-      endpoint: getEndpoint("product.get"), 
-      pathParams: { productId: id },
-      query: { targetType },
-    });
-    const response = await sendApiRequest({
-      url,
-      method: "GET",
-      accessToken: await this.auth.getAccessToken(),
-      ...this.requestOptions(),
-    });
+  private parseProductTree(response: ApiResponse): ProductResourceTree {
     if (!response.ok) {
       throw new ApiError(response);
     }
     return JSON.parse(response.bodyText) as ProductResourceTree;
   }
 
-  /**
-   * Post a product configuration using the ingestion API.
-   */
-  async postProductConfiguration(configuration: ProductConfiguration): Promise<string> {
-    const url = this.url({
-      endpoint: getEndpoint("product.configure"),
+  private createDefaultAuth(): AuthManager {
+    const { resource } = getEndpoint("products.list").service;
+    return AuthManager.fromEnv(process.env, resource ? { resource } : {});
+  }
+
+  private buildUrl(input: BuildUrlInput): URL {
+    return buildUrl(input).url;
+  }
+
+  private async sendGet(url: URL): Promise<ApiResponse> {
+    return sendApiRequest({
+      url,
+      method: "GET",
+      accessToken: await this.auth.getAccessToken(),
+      ...this.requestOptions(),
     });
+  }
 
-    const body = JSON.stringify(configuration);
-
+  private async sendPost(url: URL, body: string): Promise<ApiResponse> {
     const response = await sendApiRequest({
       url,
       method: "POST",
@@ -139,11 +185,7 @@ export class ProductsService {
     if (!response.ok) {
       throw new ApiError(response);
     }
-    return response.bodyText;
-  }
-
-  private url(input: BuildUrlInput): URL {
-    return buildUrl(input).url;
+    return response;
   }
 
   private requestOptions(): { timeoutMs?: number; fetchImpl?: typeof fetch } {

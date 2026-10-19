@@ -1,5 +1,5 @@
 import { AuthManager } from "../auth/auth-manager.js";
-import { sendApiRequest } from "../http/client.js";
+import { sendApiRequest, type ApiResponse } from "../http/client.js";
 import { ApiError } from "../http/pages.js";
 import { buildUrl, getEndpoint } from "../urls/index.js";
 
@@ -25,41 +25,53 @@ export interface JobServiceOptions {
 
 /** Reads the status of jobs started by Product Ingestion `/configure` requests. */
 export class JobService {
-
   private readonly auth: AuthManager;
   private readonly options: Omit<JobServiceOptions, "auth">;
 
-  constructor(options: JobServiceOptions = {}) {
+  public constructor(options: JobServiceOptions = {}) {
     const { auth, ...rest } = options;
     this.options = rest;
-    if (auth) {
-      this.auth = auth;
-    } else {
-      const { resource } = getEndpoint("jobs.get").service;
-      this.auth = AuthManager.fromEnv(process.env, resource ? { resource } : {});
-    }
+    this.auth = auth ?? this.createDefaultAuth();
   }
 
   /** Fetches the current status of a job returned by an operation that returns a job ID. */
-  async getJobStatus(jobId: string): Promise<ConfigureJob> {
-    const id = jobId.trim();
-    if (id.length === 0) {
-      throw new Error("Job id is required.");
-    }
+  public async getJobStatus(jobId: string): Promise<ConfigureJob> {
+    const id = this.normalizeJobId(jobId);
     const { url } = buildUrl({
       endpoint: getEndpoint("jobs.get"),
       pathParams: { jobId: id },
     });
-    const response = await sendApiRequest({
+    const response = await this.sendGet(url);
+    return this.parseJob(response);
+  }
+
+  private normalizeJobId(jobId: string): string {
+    const id = jobId.trim();
+    if (id.length === 0) {
+      throw new Error("Job id is required.");
+    }
+    return id;
+  }
+
+  private parseJob(response: ApiResponse): ConfigureJob {
+    if (!response.ok) {
+      throw new ApiError(response);
+    }
+    return JSON.parse(response.bodyText) as ConfigureJob;
+  }
+
+  private createDefaultAuth(): AuthManager {
+    const { resource } = getEndpoint("jobs.get").service;
+    return AuthManager.fromEnv(process.env, resource ? { resource } : {});
+  }
+
+  private async sendGet(url: URL): Promise<ApiResponse> {
+    return sendApiRequest({
       url,
       method: "GET",
       accessToken: await this.auth.getAccessToken(),
       ...(this.options.timeoutMs !== undefined ? { timeoutMs: this.options.timeoutMs } : {}),
       ...(this.options.fetchImpl !== undefined ? { fetchImpl: this.options.fetchImpl } : {}),
     });
-    if (!response.ok) {
-      throw new ApiError(response);
-    }
-    return JSON.parse(response.bodyText) as ConfigureJob;
   }
 }
