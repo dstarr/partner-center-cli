@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { afterEach, beforeEach, describe, it } from "node:test";
 import { AuthManager } from "../src/auth/auth-manager.js";
+import { PrivateOfferCollection, PrivateOfferListCriteria } from "../src/services/private-offer-collection.js";
 import { PrivateOffersService } from "../src/services/private-offers-service.js";
 
 const BASE = "https://graph.example.test/rp/product-ingestion";
@@ -65,18 +66,21 @@ describe("PrivateOffersService.getAllPrivateOffers", () => {
   });
 });
 
-describe("PrivateOffersService.filterPrivateOffers", () => {
+describe("PrivateOfferCollection", () => {
   const offers = [
     { name: "Contoso Demo", state: "draft", subState: "pendingAcceptance", privateOfferType: "customerPromotion" },
     { name: "Fabrikam Offer", state: "live", subState: "active", privateOfferType: "customerPromotion" },
   ] as const;
 
+  function filtered(filters: Parameters<typeof PrivateOfferListCriteria.from>[0]) {
+    return new PrivateOfferCollection(offers).apply(PrivateOfferListCriteria.from(filters)).toArray();
+  }
+
   it("filters by name, state, and subState", () => {
-    const service = new PrivateOffersService({ auth: fakeAuth() });
-    assert.deepEqual(service.filterPrivateOffers(offers, { name: "contoso" }), [offers[0]]);
-    assert.deepEqual(service.filterPrivateOffers(offers, { state: "live" }), [offers[1]]);
-    assert.deepEqual(service.filterPrivateOffers(offers, { subState: "active" }), [offers[1]]);
-    assert.deepEqual(service.filterPrivateOffers(offers, { name: "Offer", state: "live" }), [offers[1]]);
-    assert.deepEqual(service.filterPrivateOffers(offers, {}), [...offers]);
+    assert.deepEqual(filtered({ name: "contoso" }), [offers[0]]);
+    assert.deepEqual(filtered({ state: "live" }), [offers[1]]);
+    assert.deepEqual(filtered({ subState: "active" }), [offers[1]]);
+    assert.deepEqual(filtered({ name: "Offer", state: "live" }), [offers[1]]);
+    assert.deepEqual(filtered({}), [...offers]);
   });
 });

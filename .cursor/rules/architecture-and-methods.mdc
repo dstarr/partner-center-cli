@@ -1,0 +1,18 @@
+---
+description: Prefer classes and DDD aggregates; keep functions short via Extract Method
+alwaysApply: true
+---
+
+# Object-oriented design
+
+- Prefer **classes** where they clarify responsibility, state, and lifecycle (for example services, domain models, factories, and command builders).
+- Use **DDD** patterns where they fit the domain:
+  - Model consistency boundaries as **aggregates** with a single **aggregate root** as the entry point for changes.
+  - Keep invariants and business rules inside the aggregate (or domain services closely tied to it), not spread across unrelated callers.
+  - Name types and methods after domain language (ubiquitous language), not only HTTP or CLI details.
+- In classes, always declare visibility explicitly: **`public`** on public methods (and other public members), **`private`** on methods and fields that are internal to the class.
+
+# Functions and methods
+
+- Do **not** write long functions. If a function is hard to scan or mixes levels of abstraction, refactor with **Extract Method**: move cohesive steps into private methods or small collaborators with clear names.
+- Each function or method should do **one thing** at **one level of abstraction**. Prefer several short methods over one long procedure.
