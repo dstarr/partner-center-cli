@@ -1,6 +1,5 @@
 import { Option, type Command } from "commander";
 import { TARGET_TYPES, ProductsService, type TargetType } from "../services/products-service.js";
-import { globalsFrom } from "./options.js";
 import { ProductParser } from "../services/products-parser.js";
 import { MarketplaceSchemasRegistry, type MarketplaceSchema } from "../schemas/marketplace-schemas.js";
 import { JobService, type ConfigureJob } from "../services/job-service.js";
@@ -109,13 +108,8 @@ export class ProductCommandsBuilder {
                 .choices([...TARGET_TYPES]))
             .addOption(new Option("--schema <name>", "only resources that use this schema")
                 .choices([...Object.keys(MarketplaceSchemasRegistry.Schemas)]))
-            .action(async (productId: string, options: { targetType?: TargetType; schema?: keyof typeof MarketplaceSchemasRegistry.Schemas; }, command: Command) => {
-
-                const globals = globalsFrom(command);
-                const manager = new ProductsService({
-                    ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
-                    locale: globals.locale,
-                });
+            .action(async (productId: string, options: { targetType?: TargetType; schema?: keyof typeof MarketplaceSchemasRegistry.Schemas; }) => {
+                const manager = new ProductsService();
                 const target = options.targetType !== undefined ? { targetType: options.targetType } : {};
                 try {
                     const product = await manager.getProduct(productId, target);

@@ -12,7 +12,6 @@ export async function sendApiRequest(input: {
   url: URL;
   method: HttpMethod;
   accessToken: string;
-  locale?: string;
   body?: string;
   timeoutMs?: number;
   fetchImpl?: typeof fetch;
@@ -30,9 +29,6 @@ export async function sendApiRequest(input: {
     "MS-RequestId": requestId,
     "MS-CorrelationId": correlationId,
   });
-  if (input.locale) {
-    headers.set("X-Locale", input.locale);
-  }
   if (input.body !== undefined) {
     headers.set("Content-Type", "application/json");
   }

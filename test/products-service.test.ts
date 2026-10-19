@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { afterEach, beforeEach, describe, it } from "node:test";
 import { AuthManager } from "../src/auth/auth-manager.js";
 import { ApiError } from "../src/http/pages.js";
 import { ProductsService } from "../src/services/products-service.js";
@@ -29,11 +29,18 @@ describe("ProductsService.getProduct", () => {
     resources: [{ $schema: "https://schema.mp.microsoft.com/schema/product/2022-03-01-preview3", id: "product/abc" }],
   };
 
+  beforeEach(() => {
+    process.env.PRODUCT_INGESTION_BASE_URL = BASE;
+  });
+
+  afterEach(() => {
+    delete process.env.PRODUCT_INGESTION_BASE_URL;
+  });
+
   it("calls the resource-tree URL with an unquoted targetType", async () => {
     let seen = "";
     const manager = new ProductsService({
       auth: fakeAuth(),
-      baseUrl: BASE,
       fetchImpl: async (url) => {
         seen = String(url);
         return json(tree);
@@ -54,7 +61,6 @@ describe("ProductsService.getProduct", () => {
     let seen = "";
     const manager = new ProductsService({
       auth: fakeAuth(),
-      baseUrl: BASE,
       fetchImpl: async (url) => {
         seen = String(url);
         return json(tree);
@@ -68,7 +74,7 @@ describe("ProductsService.getProduct", () => {
   });
 
   it("rejects an empty id and an unknown target type", async () => {
-    const manager = new ProductsService({ auth: fakeAuth(), baseUrl: BASE, fetchImpl: async () => json(tree) });
+    const manager = new ProductsService({ auth: fakeAuth(), fetchImpl: async () => json(tree) });
     await assert.rejects(manager.getProduct("product/"), /Product id is required/);
     await assert.rejects(
       manager.getProduct("abc", { targetType: '"preview"' as never }),
@@ -79,7 +85,6 @@ describe("ProductsService.getProduct", () => {
   it("throws ApiError when the product has no live submission", async () => {
     const manager = new ProductsService({
       auth: fakeAuth(),
-      baseUrl: BASE,
       fetchImpl: async () => json({ error: { code: "badRequest" } }, 400),
     });
     await assert.rejects(manager.getProduct("abc", { targetType: "live" }), (error: unknown) => {
@@ -90,7 +95,7 @@ describe("ProductsService.getProduct", () => {
   });
 
   it("getProductResourceSchemas returns each resource's $schema", async () => {
-    const manager = new ProductsService({ auth: fakeAuth(), baseUrl: BASE, fetchImpl: async () => json(tree) });
+    const manager = new ProductsService({ auth: fakeAuth(), fetchImpl: async () => json(tree) });
     assert.deepEqual(await manager.getProductResourceSchemas("abc", { targetType: "preview" }), [
       "https://schema.mp.microsoft.com/schema/product/2022-03-01-preview3",
     ]);
@@ -98,11 +103,18 @@ describe("ProductsService.getProduct", () => {
 });
 
 describe("ProductsService.getAllProducts", () => {
+  beforeEach(() => {
+    process.env.PRODUCT_INGESTION_BASE_URL = BASE;
+  });
+
+  afterEach(() => {
+    delete process.env.PRODUCT_INGESTION_BASE_URL;
+  });
+
   it("calls the products.list URL and merges every page", async () => {
     const seen: string[] = [];
     const manager = new ProductsService({
       auth: fakeAuth(),
-      baseUrl: BASE,
       fetchImpl: async (url, init) => {
         seen.push(String(url));
         assert.equal(new Headers(init?.headers).get("Authorization"), "Bearer token");
@@ -131,7 +143,6 @@ describe("ProductsService.getAllProducts", () => {
   it("refuses to follow a next link to another host", async () => {
     const manager = new ProductsService({
       auth: fakeAuth(),
-      baseUrl: BASE,
       fetchImpl: async () =>
         json({ value: [], "@nextLink": "https://evil.example.test/product?continuationToken=x" }),
     });
@@ -141,7 +152,6 @@ describe("ProductsService.getAllProducts", () => {
   it("throws ApiError with the failed response", async () => {
     const manager = new ProductsService({
       auth: fakeAuth(),
-      baseUrl: BASE,
       fetchImpl: async () => json({ error: "forbidden" }, 403),
     });
     await assert.rejects(manager.getAllProducts(), (error: unknown) => {

@@ -6,7 +6,7 @@ import { AuthManager, DEFAULT_RESOURCE } from "../auth/auth-manager.js";
 import type { EndpointService } from "../services/endpoint-service.js";
 import type { RequestService } from "../services/request-service.js";
 import { getEndpoint, type HttpMethod } from "../urls/index.js";
-import { collect, globalsFrom } from "./options.js";
+import { collect } from "./options.js";
 
 const METHODS: readonly HttpMethod[] = ["GET", "POST", "PATCH", "PUT", "DELETE"];
 
@@ -52,13 +52,7 @@ export class ProgramCommandBuilder {
         this.program
             .name("partner-center-cli")
             .description("Explore REST APIs from a catalog of endpoints")
-            .version("0.1.0")
-            .option("--base-url <url>", "https origin to use instead of the service base URL")
-            .addOption(
-                new Option("--locale <locale>", "value for the X-Locale header")
-                    .env("PARTNER_CENTER_LOCALE")
-                    .default("en-US"),
-            );
+            .version("0.1.0");
     }
 
     private addEndpointsCommand(): void {
@@ -117,11 +111,9 @@ export class ProgramCommandBuilder {
                 .command("url")
                 .description("Print the URL for an endpoint")
                 .argument("<id>", "endpoint id"),
-        ).action((id: string, options: RequestOptions, command: Command) => {
-            const globals = globalsFrom(command);
+        ).action((id: string, options: RequestOptions) => {
             const url = this.requestService.resolveEndpointUrl({
                 id,
-                ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
                 params: options.param,
                 query: options.query,
                 strictQuery: !options.allowQuery,
@@ -141,19 +133,16 @@ export class ProgramCommandBuilder {
                 .option("--dry-run", "print the request line without sending it")
                 .option("--all", "follow @nextLink and merge every page's value array (automatic for paged endpoints)")
                 .option("--timeout <seconds>", "request timeout in seconds", "60"),
-        ).action(async (id: string, options: CallOptions, command: Command) => {
-            const globals = globalsFrom(command);
+        ).action(async (id: string, options: CallOptions) => {
             const timeoutSeconds = Number(options.timeout);
             if (!Number.isFinite(timeoutSeconds) || timeoutSeconds <= 0) {
                 throw new Error("--timeout must be a positive number of seconds.");
             }
             await this.requestService.callEndpoint({
                 id,
-                ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
                 params: options.param,
                 query: options.query,
                 strictQuery: !options.allowQuery,
-                locale: globals.locale,
                 ...(options.body !== undefined ? { body: options.body } : {}),
                 ...(options.bodyFile !== undefined ? { bodyFile: options.bodyFile } : {}),
                 dryRun: options.dryRun === true,

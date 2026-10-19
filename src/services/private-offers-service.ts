@@ -40,9 +40,6 @@ export interface PrivateOfferConfiguration {
 export interface PrivateOffersServiceOptions {
   /** Defaults to an AuthManager built from .env with the product ingestion resource. */
   auth?: AuthManager;
-  /** Replaces the service base URL, including its path. */
-  baseUrl?: string;
-  locale?: string;
   timeoutMs?: number;
   fetchImpl?: typeof fetch;
 }
@@ -67,15 +64,11 @@ export class PrivateOffersService {
   /** Fetches every private offer, including multiparty private offers, following all result pages. */
   async getAllPrivateOffers(): Promise<PrivateOffer[]> {
     const endpoint = getEndpoint("privateOffers.list");
-    const { url } = buildUrl({
-      endpoint,
-      ...(this.options.baseUrl !== undefined ? { baseUrl: this.options.baseUrl } : {}),
-    });
+    const { url } = buildUrl({ endpoint });
     const { items } = await fetchAllPages<PrivateOffer>({
       url,
       accessToken: await this.auth.getAccessToken(),
       ...(endpoint.pageItemsKey !== undefined ? { itemsKey: endpoint.pageItemsKey } : {}),
-      ...(this.options.locale !== undefined ? { locale: this.options.locale } : {}),
       ...(this.options.timeoutMs !== undefined ? { timeoutMs: this.options.timeoutMs } : {}),
       ...(this.options.fetchImpl !== undefined ? { fetchImpl: this.options.fetchImpl } : {}),
     });
@@ -107,7 +100,6 @@ export class PrivateOffersService {
     
     const { url } = buildUrl({
       endpoint: getEndpoint("privateOffers.get"),
-      ...(this.options.baseUrl !== undefined ? { baseUrl: this.options.baseUrl } : {}),
       pathParams: { id: privateOfferId },
     });
 
@@ -115,7 +107,6 @@ export class PrivateOffersService {
       url,
       method: "GET",
       accessToken: await this.auth.getAccessToken(),
-      ...(this.options.locale !== undefined ? { locale: this.options.locale } : {}),
       ...(this.options.timeoutMs !== undefined ? { timeoutMs: this.options.timeoutMs } : {}),
       ...(this.options.fetchImpl !== undefined ? { fetchImpl: this.options.fetchImpl } : {}),
     });
@@ -135,7 +126,6 @@ export class PrivateOffersService {
     
     const { url } = buildUrl({
       endpoint: getEndpoint("privateOffers.configure"),
-      ...(this.options.baseUrl !== undefined ? { baseUrl: this.options.baseUrl } : {}),
     });
 
     const body: string = JSON.stringify(configuration, null, 2);
@@ -148,7 +138,6 @@ export class PrivateOffersService {
       method: "POST",
       accessToken: await this.auth.getAccessToken(),
       body,
-      ...(this.options.locale !== undefined ? { locale: this.options.locale } : {}),
       ...(this.options.timeoutMs !== undefined ? { timeoutMs: this.options.timeoutMs } : {}),
       ...(this.options.fetchImpl !== undefined ? { fetchImpl: this.options.fetchImpl } : {}),
     });

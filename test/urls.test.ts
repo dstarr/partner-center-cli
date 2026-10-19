@@ -7,6 +7,7 @@ import {
   buildUrl,
   endpoints,
   getEndpoint,
+  normalizeBaseUrl,
   services,
   UrlBuildError,
   type Endpoint,
@@ -109,7 +110,6 @@ describe("buildUrl", () => {
   it("encodes path parameters and appends declared query parameters", () => {
     const built = buildUrl({
       endpoint: getItem,
-      baseUrl: BASE,
       pathParams: { itemId: "abc", partId: "00 01" },
       query: { country: "US" },
     });
@@ -119,14 +119,13 @@ describe("buildUrl", () => {
 
   it("requires declared path and query parameters", () => {
     assert.throws(
-      () => buildUrl({ endpoint: getItem, baseUrl: BASE, query: { country: "US" } }),
+      () => buildUrl({ endpoint: getItem, query: { country: "US" } }),
       /Missing path parameter "itemId".*--param itemId=<value>/,
     );
     assert.throws(
       () =>
         buildUrl({
           endpoint: getItem,
-          baseUrl: BASE,
           pathParams: { itemId: "a", partId: "b" },
         }),
       /Missing query parameter "country".*--query country=<value>/,
@@ -136,7 +135,6 @@ describe("buildUrl", () => {
   it("rejects unknown query parameters unless strict mode is off", () => {
     const input = {
       endpoint: getItem,
-      baseUrl: BASE,
       pathParams: { itemId: "a", partId: "b" },
       query: { country: "US", filter: "x" },
     };
@@ -150,7 +148,6 @@ describe("buildUrl", () => {
       () =>
         buildUrl({
           endpoint: getItem,
-          baseUrl: BASE,
           pathParams: { itemId: "a", partId: "b" },
           query: { country: "US", itemId: "a" },
           strictQuery: false,
@@ -160,9 +157,12 @@ describe("buildUrl", () => {
   });
 
   it("keeps the path of a base URL", () => {
+    const workloadService: ServiceDefinition = {
+      description: "Workload",
+      defaultBaseUrl: `${BASE}/rp/workload/`,
+    };
     const built = buildUrl({
-      endpoint: getItem,
-      baseUrl: `${BASE}/rp/workload/`,
+      endpoint: { ...getItem, service: workloadService },
       pathParams: { itemId: "a", partId: "b" },
       query: { country: "US" },
     });
@@ -170,9 +170,8 @@ describe("buildUrl", () => {
   });
 
   it("rejects a base URL that is not https or has a query", () => {
-    const input = { endpoint: getItem, pathParams: { itemId: "a", partId: "b" }, query: { country: "US" } };
-    assert.throws(() => buildUrl({ ...input, baseUrl: `${BASE}?x=1` }), UrlBuildError);
-    assert.throws(() => buildUrl({ ...input, baseUrl: "http://api.example.test" }), UrlBuildError);
+    assert.throws(() => normalizeBaseUrl(`${BASE}?x=1`), UrlBuildError);
+    assert.throws(() => normalizeBaseUrl("http://api.example.test"), UrlBuildError);
   });
 
   it("sends query defaults and keeps a literal $ in OData names", () => {
@@ -185,11 +184,10 @@ describe("buildUrl", () => {
         { name: "type", description: "Type.", required: false },
       ],
     };
-    const defaulted = buildUrl({ endpoint, baseUrl: BASE });
+    const defaulted = buildUrl({ endpoint });
     assert.equal(defaulted.url.toString(), `${BASE}/items?$version=2022-03-01-preview3`);
     const overridden = buildUrl({
       endpoint,
-      baseUrl: BASE,
       query: { $version: "2023-01-01", type: "a b&c" },
     });
     assert.equal(overridden.url.toString(), `${BASE}/items?$version=2023-01-01&type=a%20b%26c`);
@@ -205,13 +203,12 @@ describe("sendApiRequest", () => {
       url: new URL(`${BASE}/v1/items`),
       method: "GET",
       accessToken: "secret-token",
-      locale: "en-US",
       fetchImpl: async (_url, init) => {
         const headers = new Headers(init?.headers);
         seenAuthorization = headers.get("Authorization") ?? "";
         seenRequestId = headers.get("MS-RequestId") ?? "";
         assert.equal(headers.get("Accept"), "application/json");
-        assert.equal(headers.get("X-Locale"), "en-US");
+        assert.equal(headers.get("X-Locale"), null);
         assert.match(headers.get("MS-CorrelationId") ?? "", /^[0-9a-f-]{36}$/);
         return new Response(JSON.stringify({ ok: true }), {
           status: 200,

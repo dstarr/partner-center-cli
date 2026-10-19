@@ -44,8 +44,6 @@ export interface Endpoint {
 
 export interface BuildUrlInput {
   endpoint: Endpoint;
-  /** Replaces the service base URL for this call. Must be an https URL without a query or hash. */
-  baseUrl?: string;
   pathParams?: Readonly<Record<string, string | number>>;
   query?: Readonly<Record<string, string | number | boolean | undefined | null>>;
   /**

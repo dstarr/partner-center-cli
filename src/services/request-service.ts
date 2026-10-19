@@ -9,7 +9,6 @@ import { formatBody, parseAssignments } from "../params.js";
 export class RequestService {
   resolveEndpointUrl(input: {
     id: string;
-    baseUrl?: string;
     params: readonly string[];
     query: readonly string[];
     strictQuery: boolean;
@@ -17,7 +16,6 @@ export class RequestService {
     const endpoint = getEndpoint(input.id);
     const built = buildUrl({
       endpoint,
-      ...(input.baseUrl !== undefined ? { baseUrl: input.baseUrl } : {}),
       pathParams: parseAssignments(input.params, "--param"),
       query: parseAssignments(input.query, "--query"),
       strictQuery: input.strictQuery,
@@ -27,11 +25,9 @@ export class RequestService {
 
   async callEndpoint(input: {
     id: string;
-    baseUrl?: string;
     params: readonly string[];
     query: readonly string[];
     strictQuery: boolean;
-    locale: string;
     body?: string;
     bodyFile?: string;
     dryRun: boolean;
@@ -61,7 +57,6 @@ export class RequestService {
         const { items, pages } = await fetchAllPages({
           url,
           accessToken: token,
-          locale: input.locale,
           timeoutMs: input.timeoutMs,
           onRequest: (next) => console.error(`GET ${next.toString()}`),
           ...(endpoint.pageItemsKey !== undefined ? { itemsKey: endpoint.pageItemsKey } : {}),
@@ -82,7 +77,6 @@ export class RequestService {
       url,
       method: endpoint.method,
       accessToken: token,
-      locale: input.locale,
       ...(body !== undefined ? { body } : {}),
       timeoutMs: input.timeoutMs,
     });

@@ -1,6 +1,5 @@
 import type { Command } from "commander";
 import { PrivateOffersService, type PrivateOffer } from "../services/private-offers-service.js";
-import { globalsFrom, type GlobalOptions } from "./options.js";
 import { PrivateOfferSchemas } from "../services/private-offers-service.js";
 import { JobService, type ConfigureJob } from "../services/job-service.js";
 import { PrivateOfferFactory } from "../services/private-offer-configuration-factory.js";
@@ -23,22 +22,13 @@ export class PrivateOfferCommandsBuilder {
         privateOffersCommand.command("create")
             .description("Create a new private offer")
             .argument("<name>", "name of the private offer")
-            .action(async (name: string, _options: unknown, command: Command) => {
-                
-                const globals: GlobalOptions = globalsFrom(command);
-                
-                const privateOffersService: PrivateOffersService = new PrivateOffersService({
-                    ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
-                    locale: globals.locale,
-                });
+            .action(async (name: string) => {
+                const privateOffersService: PrivateOffersService = new PrivateOffersService();
 
                 const result: ConfigureJob = await privateOffersService.createPrivateOffer(name);
                 
                 // poll for the job to complete
-                const jobService: JobService = new JobService({
-                    ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
-                    locale: globals.locale,
-                });
+                const jobService: JobService = new JobService();
                 
                 let job: ConfigureJob = result;
                 while (job.jobStatus !== "completed") {
@@ -53,12 +43,8 @@ export class PrivateOfferCommandsBuilder {
     private listPrivateOffersCommand(privateOffersCommand: Command): void {
         privateOffersCommand.command("list")
             .description("List all private offers, including multiparty private offers")
-            .action(async (_options: unknown, command: Command) => {
-                const globals = globalsFrom(command) as GlobalOptions;
-                const privateOffersService = new PrivateOffersService({
-                    ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
-                    locale: globals.locale,
-                });
+            .action(async () => {
+                const privateOffersService = new PrivateOffersService();
                 const privateOffers = await privateOffersService.getAllPrivateOffers();
                 console.log(JSON.stringify(privateOffers, null, 2));
             });
@@ -68,12 +54,8 @@ export class PrivateOfferCommandsBuilder {
         privateOffersCommand.command("get")
             .description("Get a private offer by its id")
             .argument("<id>", "private offer id")
-            .action(async (id: string, _options: unknown, command: Command) => {
-                const globals = globalsFrom(command) as GlobalOptions;
-                const privateOffersService = new PrivateOffersService({
-                    ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
-                    locale: globals.locale,
-                });
+            .action(async (id: string) => {
+                const privateOffersService = new PrivateOffersService();
                 const privateOffer = await privateOffersService.getPrivateOffer(id) as PrivateOffer;
                 console.error(`Private offer: ${privateOffer.id}`);
                 console.log(JSON.stringify(privateOffer, null, 2));
@@ -84,12 +66,8 @@ export class PrivateOfferCommandsBuilder {
         privateOffersCommand.command("delete")
             .description("Delete a private offer")
             .argument("<id>", "private offer id")
-            .action(async (id: string, _options: unknown, command: Command) => {
-                const globals = globalsFrom(command) as GlobalOptions;
-                const privateOffersService = new PrivateOffersService({
-                    ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
-                    locale: globals.locale,
-                });
+            .action(async (id: string) => {
+                const privateOffersService = new PrivateOffersService();
                 
                 const privateOffer: PrivateOffer = await privateOffersService.getPrivateOffer(id);
 
@@ -103,10 +81,7 @@ export class PrivateOfferCommandsBuilder {
                 });
 
                 // poll for the job to complete
-                const jobService: JobService = new JobService({
-                    ...(globals.baseUrl !== undefined ? { baseUrl: globals.baseUrl } : {}),
-                    locale: globals.locale,
-                });
+                const jobService: JobService = new JobService();
                 let job: ConfigureJob = result;
                 while (job.jobStatus !== "completed") {
                     await new Promise(resolve => setTimeout(resolve, 1000));

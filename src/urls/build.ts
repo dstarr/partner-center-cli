@@ -89,10 +89,7 @@ export function buildUrl(input: BuildUrlInput): BuiltRequest {
     path = path.replaceAll(`{${name}}`, encodeURIComponent(value));
   }
 
-  const baseUrl = resolveBaseUrl({
-    service: endpoint.service,
-    ...(input.baseUrl !== undefined ? { baseUrl: input.baseUrl } : {}),
-  });
+  const baseUrl = resolveBaseUrl(endpoint.service);
   const url = new URL(`${baseUrl}${path}`);
 
   const valueFor = (param: QueryParam) => query[param.name] ?? param.default;

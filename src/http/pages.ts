@@ -16,7 +16,6 @@ export class ApiError extends Error {
 export async function fetchAllPages<T = unknown>(input: {
   url: URL;
   accessToken: string;
-  locale?: string;
   timeoutMs?: number;
   fetchImpl?: typeof fetch;
   onRequest?: (url: URL) => void;
@@ -36,7 +35,6 @@ export async function fetchAllPages<T = unknown>(input: {
       url: next,
       method: "GET",
       accessToken: input.accessToken,
-      ...(input.locale !== undefined ? { locale: input.locale } : {}),
       ...(input.timeoutMs !== undefined ? { timeoutMs: input.timeoutMs } : {}),
       ...(input.fetchImpl !== undefined ? { fetchImpl: input.fetchImpl } : {}),
     });

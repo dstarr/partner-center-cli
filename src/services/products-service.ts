@@ -40,9 +40,6 @@ export interface ProductResourceTree {
 export interface ProductsServiceOptions {
   /** Defaults to an AuthManager built from .env with the product ingestion resource. */
   auth?: AuthManager;
-  /** Replaces the service base URL, including its path. */
-  baseUrl?: string;
-  locale?: string;
   timeoutMs?: number;
   fetchImpl?: typeof fetch;
 }
@@ -145,16 +142,12 @@ export class ProductsService {
     return response.bodyText;
   }
 
-  private url(input: Omit<BuildUrlInput, "baseUrl">): URL {
-    return buildUrl({
-      ...input,
-      ...(this.options.baseUrl !== undefined ? { baseUrl: this.options.baseUrl } : {}),
-    }).url;
+  private url(input: BuildUrlInput): URL {
+    return buildUrl(input).url;
   }
 
-  private requestOptions(): { locale?: string; timeoutMs?: number; fetchImpl?: typeof fetch } {
+  private requestOptions(): { timeoutMs?: number; fetchImpl?: typeof fetch } {
     return {
-      ...(this.options.locale !== undefined ? { locale: this.options.locale } : {}),
       ...(this.options.timeoutMs !== undefined ? { timeoutMs: this.options.timeoutMs } : {}),
       ...(this.options.fetchImpl !== undefined ? { fetchImpl: this.options.fetchImpl } : {}),
     };

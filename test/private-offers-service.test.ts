@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { afterEach, beforeEach, describe, it } from "node:test";
 import { AuthManager } from "../src/auth/auth-manager.js";
 import { PrivateOffersService } from "../src/services/private-offers-service.js";
 
@@ -21,11 +21,18 @@ function json(body: unknown, status = 200): Response {
 }
 
 describe("PrivateOffersService.getAllPrivateOffers", () => {
+  beforeEach(() => {
+    process.env.PRODUCT_INGESTION_BASE_URL = BASE;
+  });
+
+  afterEach(() => {
+    delete process.env.PRODUCT_INGESTION_BASE_URL;
+  });
+
   it("reads the privateOffers array from every page", async () => {
     const seen: string[] = [];
     const service = new PrivateOffersService({
       auth: fakeAuth(),
-      baseUrl: BASE,
       fetchImpl: async (url) => {
         seen.push(String(url));
         if (seen.length === 1) {
@@ -53,7 +60,7 @@ describe("PrivateOffersService.getAllPrivateOffers", () => {
   });
 
   it("rejects a page without a privateOffers array", async () => {
-    const service = new PrivateOffersService({ auth: fakeAuth(), baseUrl: BASE, fetchImpl: async () => json({ value: [] }) });
+    const service = new PrivateOffersService({ auth: fakeAuth(), fetchImpl: async () => json({ value: [] }) });
     await assert.rejects(service.getAllPrivateOffers(), /privateOffers array/);
   });
 });

@@ -35,23 +35,15 @@ npm run dev -- call products.list --query type=softwareAsAService
 
 Settings may be read from a `.env` file in the project root directory. Copy `.env.example` to `.env` and fill it in. `.env` is gitignored.
 
-| Variable | Flag | Default |
-| --- | --- | --- |
-| `PARTNER_CENTER_TENANT_ID` | none | none |
-| `PARTNER_CENTER_CLIENT_ID` | none | none |
-| `PARTNER_CENTER_CLIENT_SECRET` | none | none |
-| `PRODUCT_INGESTION_BASE_URL` | `--base-url` | `https://graph.microsoft.com/rp/product-ingestion` |
-| `SCHEMA_BASE_URL` | none | `https://schema.mp.microsoft.com` |
-| `PARTNER_CENTER_LOCALE` | `--locale` | `en-US` |
+| Variable | Default |
+| --- | --- |
+| `PARTNER_CENTER_TENANT_ID` | none |
+| `PARTNER_CENTER_CLIENT_ID` | none |
+| `PARTNER_CENTER_CLIENT_SECRET` | none |
+| `PRODUCT_INGESTION_BASE_URL` | `https://graph.microsoft.com/rp/product-ingestion` |
+| `SCHEMA_BASE_URL` | `https://schema.mp.microsoft.com` |
 
-A flag overrides the environment. A variable already set in your shell overrides `.env`. Blank entries count as unset.
-
-### Global options
-
-These apply to most commands:
-
-- `--base-url <url>` — HTTPS origin for Product Ingestion (overrides `PRODUCT_INGESTION_BASE_URL`)
-- `--locale <locale>` — `X-Locale` header (default `en-US`, env `PARTNER_CENTER_LOCALE`)
+A variable already set in your shell overrides `.env`. Blank entries count as unset.
 
 ## Commands
 

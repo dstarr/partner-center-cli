@@ -50,12 +50,6 @@ export function normalizeBaseUrl(value: string): string {
   return `${url.origin}${url.pathname.replace(/\/+$/, "")}`;
 }
 
-export function resolveBaseUrl(input: { 
-  service: ServiceDefinition; 
-  baseUrl?: string 
-}): string {
-  if (input.baseUrl !== undefined) {
-    return normalizeBaseUrl(input.baseUrl);
-  }
-  return baseUrlFor(input.service);
+export function resolveBaseUrl(service: ServiceDefinition, env: NodeJS.ProcessEnv = process.env): string {
+  return baseUrlFor(service, env);
 }

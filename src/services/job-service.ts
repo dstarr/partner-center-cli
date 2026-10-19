@@ -19,9 +19,6 @@ export interface ConfigureJob {
 export interface JobServiceOptions {
   /** Defaults to an AuthManager built from .env with the product ingestion resource. */
   auth?: AuthManager;
-  /** Replaces the service base URL, including its path. */
-  baseUrl?: string;
-  locale?: string;
   timeoutMs?: number;
   fetchImpl?: typeof fetch;
 }
@@ -51,14 +48,12 @@ export class JobService {
     }
     const { url } = buildUrl({
       endpoint: getEndpoint("jobs.get"),
-      ...(this.options.baseUrl !== undefined ? { baseUrl: this.options.baseUrl } : {}),
       pathParams: { jobId: id },
     });
     const response = await sendApiRequest({
       url,
       method: "GET",
       accessToken: await this.auth.getAccessToken(),
-      ...(this.options.locale !== undefined ? { locale: this.options.locale } : {}),
       ...(this.options.timeoutMs !== undefined ? { timeoutMs: this.options.timeoutMs } : {}),
       ...(this.options.fetchImpl !== undefined ? { fetchImpl: this.options.fetchImpl } : {}),
     });

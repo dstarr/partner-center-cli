@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { afterEach, beforeEach, describe, it } from "node:test";
 import { AuthManager } from "../src/auth/auth-manager.js";
 import { ApiError } from "../src/http/pages.js";
 import { JobService } from "../src/services/job-service.js";
@@ -18,11 +18,18 @@ function fakeAuth(): AuthManager {
 }
 
 describe("JobService.getJobStatus", () => {
+  beforeEach(() => {
+    process.env.PRODUCT_INGESTION_BASE_URL = BASE;
+  });
+
+  afterEach(() => {
+    delete process.env.PRODUCT_INGESTION_BASE_URL;
+  });
+
   it("fetches the job status from /configure/{jobId}/status", async () => {
     const seen: string[] = [];
     const service = new JobService({
       auth: fakeAuth(),
-      baseUrl: BASE,
       fetchImpl: async (url) => {
         seen.push(String(url));
         return new Response(
@@ -41,14 +48,13 @@ describe("JobService.getJobStatus", () => {
   it("throws ApiError when the request fails", async () => {
     const service = new JobService({
       auth: fakeAuth(),
-      baseUrl: BASE,
       fetchImpl: async () => new Response("{}", { status: 404 }),
     });
     await assert.rejects(service.getJobStatus("missing"), ApiError);
   });
 
   it("rejects an empty job id", async () => {
-    const service = new JobService({ auth: fakeAuth(), baseUrl: BASE, fetchImpl: async () => new Response("{}") });
+    const service = new JobService({ auth: fakeAuth(), fetchImpl: async () => new Response("{}") });
     await assert.rejects(service.getJobStatus("  "), /Job id is required/);
   });
 });
