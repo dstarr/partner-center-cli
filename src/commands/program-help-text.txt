@@ -7,6 +7,7 @@ Examples:
   partner-center-cli mcp version
   partner-center-cli private-offers create <name>
   partner-center-cli private-offers delete <id>
+  partner-center-cli private-offers withdraw <id>
   partner-center-cli private-offers get <id>
   partner-center-cli private-offers list
   partner-center-cli products get [options] <productId>
@@ -15,6 +16,3 @@ Examples:
   partner-center-cli products getSchemas [options] <productId>
   partner-center-cli products list
   partner-center-cli products rename <productId> <alias>
-
-Register APIs in src/urls/bases.ts and add operations in src/urls/endpoints.ts.
-The URL builder checks each path template against its declared parameters.

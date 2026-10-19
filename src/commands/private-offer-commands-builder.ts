@@ -4,9 +4,7 @@ import {
     type PrivateOffer,
     type PrivateOfferListFilter,
 } from "../services/private-offers-service.js";
-import { PrivateOfferSchemas } from "../services/private-offers-service.js";
 import { JobService, type ConfigureJob } from "../services/job-service.js";
-import { PrivateOfferFactory } from "../services/private-offer-configuration-factory.js";
 
 export class PrivateOfferCommandsBuilder {
     
@@ -20,6 +18,7 @@ export class PrivateOfferCommandsBuilder {
         this.deletePrivateOfferCommand(privateOffersCommand);
         this.getPrivateOfferCommand(privateOffersCommand);
         this.listPrivateOffersCommand(privateOffersCommand);
+        this.withdrawPrivateOfferCommand(privateOffersCommand);
     }
     
     private createPrivateOfferCommand(privateOffersCommand: Command): void {
@@ -27,20 +26,9 @@ export class PrivateOfferCommandsBuilder {
             .description("Create a new private offer")
             .argument("<name>", "name of the private offer")
             .action(async (name: string) => {
-                const privateOffersService: PrivateOffersService = new PrivateOffersService();
-
-                const result: ConfigureJob = await privateOffersService.createPrivateOffer(name);
-                
-                // poll for the job to complete
-                const jobService: JobService = new JobService();
-                
-                let job: ConfigureJob = result;
-                while (job.jobStatus !== "completed") {
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                    job = await jobService.getJobStatus(job.jobId);
-                    console.log(JSON.stringify(job, null, 2));
-                }
-                console.log(`Job completed: ${job.jobResult}`);
+                const privateOffersService = new PrivateOffersService();
+                const result = await privateOffersService.createPrivateOffer(name);
+                await this.pollJobUntilComplete(result);
             });
     }
 
@@ -75,27 +63,30 @@ export class PrivateOfferCommandsBuilder {
             .argument("<id>", "private offer id")
             .action(async (id: string) => {
                 const privateOffersService = new PrivateOffersService();
-                
-                const privateOffer: PrivateOffer = await privateOffersService.getPrivateOffer(id);
-
-                privateOffer.state = "deleted";
-
-                const result: ConfigureJob = await privateOffersService.postPrivateOfferConfiguration({
-                    $schema: PrivateOfferSchemas.Configure,
-                    resources: [
-                        privateOffer
-                    ],
-                });
-
-                // poll for the job to complete
-                const jobService: JobService = new JobService();
-                let job: ConfigureJob = result;
-                while (job.jobStatus !== "completed") {
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                    job = await jobService.getJobStatus(job.jobId);
-                    console.log(JSON.stringify(job, null, 2));
-                }
-                console.log(`Job completed: ${job.jobStatus}`);
+                const result = await privateOffersService.deletePrivateOffer(id);
+                await this.pollJobUntilComplete(result);
             });
+    }
+
+    private withdrawPrivateOfferCommand(privateOffersCommand: Command): void {
+        privateOffersCommand.command("withdraw")
+            .description("Withdraw a private offer (configure state draft)")
+            .argument("<id>", "private offer id")
+            .action(async (id: string) => {
+                const privateOffersService = new PrivateOffersService();
+                const result = await privateOffersService.withdrawPrivateOffer(id);
+                await this.pollJobUntilComplete(result);
+            });
+    }
+
+    private async pollJobUntilComplete(result: ConfigureJob): Promise<void> {
+        const jobService = new JobService();
+        let job: ConfigureJob = result;
+        while (job.jobStatus !== "completed") {
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            job = await jobService.getJobStatus(job.jobId);
+            console.log(JSON.stringify(job, null, 2));
+        }
+        console.log(`Job completed: ${job.jobResult ?? job.jobStatus}`);
     }
 }

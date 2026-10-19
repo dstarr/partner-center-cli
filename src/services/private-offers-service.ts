@@ -5,6 +5,7 @@ import { buildUrl, getEndpoint } from "../urls/index.js";
 import type { ConfigureJob } from "./job-service.js";
 import { PrivateOfferCollection, PrivateOfferListCriteria } from "./private-offer-collection.js";
 import { PrivateOfferFactory } from "./private-offer-configuration-factory.js";
+import { PrivateOfferStatePayloadBuilder } from "./private-offer-state-payload.js";
 import type {
   PrivateOffer,
   PrivateOfferConfiguration,
@@ -27,6 +28,7 @@ export class PrivateOffersService {
 
   private readonly auth: AuthManager;
   private readonly options: Omit<PrivateOffersServiceOptions, "auth">;
+  private readonly statePayloadBuilder = new PrivateOfferStatePayloadBuilder();
 
   public constructor(options: PrivateOffersServiceOptions = {}) {
     const { auth, ...rest } = options;
@@ -35,7 +37,7 @@ export class PrivateOffersService {
   }
 
   /** Fetches every private offer, including multiparty private offers, following all result pages. */
-  public async getAllPrivateOffers(): Promise<PrivateOffer[]> {
+  private async getAllPrivateOffers(): Promise<PrivateOffer[]> {
     const endpoint = getEndpoint("privateOffers.list");
     const { url } = buildUrl({ endpoint });
     const { items } = await fetchAllPages<PrivateOffer>({
@@ -72,6 +74,16 @@ export class PrivateOffersService {
     return this.parsePrivateOfferGetResponse(response);
   }
 
+  /** Withdraws a private offer (API sets state to `draft`). */
+  public async withdrawPrivateOffer(id: string): Promise<ConfigureJob> {
+    return this.configurePrivateOfferState(id, (offer) => this.statePayloadBuilder.buildWithdrawPayload(offer));
+  }
+
+  /** Sets a private offer's state to `deleted` via configure. */
+  public async deletePrivateOffer(id: string): Promise<ConfigureJob> {
+    return this.configurePrivateOfferState(id, (offer) => this.statePayloadBuilder.buildDeletePayload(offer));
+  }
+
   public async postPrivateOfferConfiguration(configuration: PrivateOfferConfiguration): Promise<ConfigureJob> {
     const { url } = buildUrl({
       endpoint: getEndpoint("privateOffers.configure"),
@@ -80,6 +92,17 @@ export class PrivateOffersService {
     this.logConfigureRequest(body);
     const response = await this.sendPost(url, body);
     return this.parseConfigureResponse(response);
+  }
+
+  private async configurePrivateOfferState(
+    id: string,
+    buildResource: (offer: PrivateOffer) => PrivateOffer,
+  ): Promise<ConfigureJob> {
+    const privateOffer = await this.getPrivateOffer(id);
+    return this.postPrivateOfferConfiguration({
+      $schema: PrivateOfferSchemas.Configure,
+      resources: [buildResource(privateOffer)],
+    });
   }
 
   private filterOffers(offers: readonly PrivateOffer[], filters: PrivateOfferListFilter): PrivateOffer[] {

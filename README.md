@@ -84,6 +84,7 @@ For `--schema`, `<name>` is a marketplace schema key (for example `Plan`, `Produ
 | `private-offers get <id>` | Get one private offer by id |
 | `private-offers create <name>` | Create a private offer (polls configure job until complete) |
 | `private-offers delete <id>` | Mark a private offer deleted via configure (polls job until complete) |
+| `private-offers withdraw <id>` | Withdraw a private offer (polls job until complete) |
 
 ### `jobs`
 

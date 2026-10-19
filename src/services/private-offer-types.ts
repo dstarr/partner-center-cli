@@ -13,8 +13,9 @@ export interface PrivateOffer {
   name: string;
   /** Such as `customerPromotion`, `cspPromotion`, or `multipartyPromotionOriginator`. */
   privateOfferType: string;
-  /** Such as `draft`, `live`, or `withdrawn`. */
+  /** Such as `draft`, `live`, or `deleted`. List views may show `withdrawn`; withdraw via API sets `draft`. */
   state: string;
+  offerPricingType?: string;
   subState?: string;
   variableStartDate?: boolean;
   start?: string;

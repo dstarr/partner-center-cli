@@ -21,7 +21,7 @@ function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status });
 }
 
-describe("PrivateOffersService.getAllPrivateOffers", () => {
+describe("PrivateOffersService.withdrawPrivateOffer", () => {
   beforeEach(() => {
     process.env.PRODUCT_INGESTION_BASE_URL = BASE;
   });
@@ -30,39 +30,38 @@ describe("PrivateOffersService.getAllPrivateOffers", () => {
     delete process.env.PRODUCT_INGESTION_BASE_URL;
   });
 
-  it("reads the privateOffers array from every page", async () => {
-    const seen: string[] = [];
+  it("posts a minimal configure body with state draft", async () => {
+    let configureBody = "";
+    const offer = {
+      $schema: "https://schema.mp.microsoft.com/schema/private-offer/2023-07-15",
+      id: "private-offer/abc",
+      name: "Test",
+      privateOfferType: "customerPromotion",
+      offerPricingType: "editExistingOfferPricingOnly",
+      state: "live",
+      notificationContacts: ["david@example.com"],
+    };
     const service = new PrivateOffersService({
       auth: fakeAuth(),
-      fetchImpl: async (url) => {
-        seen.push(String(url));
-        if (seen.length === 1) {
-          return json({
-            privateOffers: [{ id: "private-offer/1", name: "One", privateOfferType: "customerPromotion", state: "draft" }],
-            "@nextLink": `${BASE}/private-offer?%24version=2023-07-15&continuationToken=abc`,
-          });
+      fetchImpl: async (url, init) => {
+        const href = String(url);
+        if (href.includes("/private-offer/abc") && !href.includes("configure")) {
+          return json(offer);
         }
-        return json({
-          privateOffers: [{ id: "private-offer/2", name: "Two", privateOfferType: "customerPromotion", state: "live" }],
-        });
+        if (href.includes("/configure")) {
+          configureBody = String(init?.body ?? "");
+          return json({ jobId: "job-1", jobStatus: "completed", jobResult: "succeeded", errors: [] });
+        }
+        throw new Error(`Unexpected URL: ${href}`);
       },
     });
 
-    const offers = await service.getAllPrivateOffers();
+    await service.withdrawPrivateOffer("abc");
 
-    assert.deepEqual(
-      offers.map((offer) => offer.id),
-      ["private-offer/1", "private-offer/2"],
-    );
-    assert.deepEqual(seen, [
-      `${BASE}/private-offer/query?$version=2023-07-15`,
-      `${BASE}/private-offer?%24version=2023-07-15&continuationToken=abc`,
-    ]);
-  });
-
-  it("rejects a page without a privateOffers array", async () => {
-    const service = new PrivateOffersService({ auth: fakeAuth(), fetchImpl: async () => json({ value: [] }) });
-    await assert.rejects(service.getAllPrivateOffers(), /privateOffers array/);
+    const posted = JSON.parse(configureBody) as { resources: { state: string }[] };
+    assert.equal(posted.resources[0]?.state, "draft");
+    assert.equal(posted.resources[0]?.offerPricingType, "editExistingOfferPricingOnly");
+    assert.equal(posted.resources[0]?.notificationContacts, undefined);
   });
 });
 
